@@ -1,0 +1,1697 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ATO Soundboard</title>
+<meta name="description" content="A shared soundboard for Aeon Trespass: Odyssey sessions.">
+<meta name="theme-color" content="#0d1417">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ATO Sounds">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&family=Marcellus+SC&display=swap">
+<style>
+/* Layout: a stage console. Sticky header (wordmark, actions, group tabs, meander rule) over a grid of
+   hardware-style pads; a fixed dock holds what's playing and Stop all; editing happens in a full sheet.
+   One deliberate dark look, for a dim game table. */
+:root{
+  color-scheme: dark;
+  --ground:#0d1417; --panel:#131d21; --raise:#1a272c; --line:#29393f;
+  --ink:#ece4d4; --ink-2:#a5afab; --ink-3:#6e7b78;
+  --bronze:#cf9455; --on-bronze:#1b1209; --danger:#e0654c;
+  --p0:#b4543b; --p1:#c39233; --p2:#7f8b3b; --p3:#3f8c7e; --p4:#3b72a3; --p5:#5257a6; --p6:#87437c; --p7:#b3a88f;
+  --f-display:"Marcellus SC","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --f-ui:"Barlow Semi Condensed","Avenir Next Condensed","Arial Narrow",system-ui,sans-serif;
+  --r:10px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--ground);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);min-height:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--f-ui);font-size:16px;min-height:100%;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+body.locked{overflow:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--ground)}
+[hidden]{display:none!important}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,select{font-family:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--bronze)}
+:focus-visible{outline:2px solid var(--bronze);outline-offset:2px}
+svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+svg.i.f{fill:currentColor;stroke:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin svg.i{animation:spin 1s linear infinite}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--ground)}
+.bar{display:flex;align-items:center;gap:10px 12px;padding-block:12px 8px;flex-wrap:wrap}
+.brand{font-family:var(--f-display);font-size:27px;line-height:1;letter-spacing:.03em;white-space:nowrap;margin-right:4px}
+.brand b{font-weight:400;color:var(--bronze)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;min-width:0}
+.chip-s{height:30px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border-radius:999px;border:1px solid var(--line);font-size:14px;font-weight:500;color:var(--ink-2);background:transparent;white-space:nowrap}
+.chip-s.warn{border-color:var(--bronze);color:var(--bronze)}
+.actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{height:44px;padding:0 16px;border-radius:var(--r);border:1px solid var(--line);background:var(--raise);font-size:16px;font-weight:600;letter-spacing:.02em;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;touch-action:manipulation;text-decoration:none;color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.primary{background:var(--bronze);border-color:transparent;color:var(--on-bronze)}
+.btn.on{background:var(--ink);border-color:var(--ink);color:var(--ground)}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--danger);border-color:color-mix(in oklab,var(--danger) 45%,var(--line))}
+.btn.danger.armed{background:var(--danger);color:#1a0b07;border-color:transparent}
+.btn.icon{width:44px;padding:0}
+.btn.sm{height:36px;padding:0 12px;font-size:15px}
+.vol{display:flex;align-items:center;gap:8px;height:44px;padding:0 12px;border:1px solid var(--line);border-radius:var(--r);color:var(--ink-2)}
+.vol input{width:110px}
+input[type=range]{accent-color:var(--bronze);height:28px;margin:0}
+.tabs-row{display:flex;align-items:center;gap:8px;padding-block:2px 10px}
+.tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;padding-block:2px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;height:38px;padding:0 15px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink-2);font-size:14px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;touch-action:manipulation}
+.tab[aria-selected="true"]{background:var(--raise);color:var(--ink);border-color:var(--bronze)}
+.tab .n{color:var(--ink-3);margin-left:7px;font-variant-numeric:tabular-nums;letter-spacing:0}
+.rename{display:flex;gap:6px;align-items:center}
+.rename input{height:36px;width:170px;border-radius:8px;border:1px solid var(--bronze);background:var(--panel);padding:0 10px;font-size:15px}
+.meander{height:10px;opacity:.55;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10'%3E%3Cpath d='M0 9.25H14M3 9.25V1.75H11V6.75H6V4.25H8.5' fill='none' stroke='rgb(207,148,85)' stroke-width='1.3'/%3E%3C/svg%3E") repeat-x left center}
+.banner{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding:10px 14px;border-radius:var(--r);border:1px solid var(--line);background:var(--panel);color:var(--ink-2);font-size:15px;line-height:1.4;max-width:80ch}
+.banner b{color:var(--ink);font-weight:600}
+.banner .x{margin-left:auto;flex:none;width:32px;height:32px;border-radius:8px;border:0;background:transparent;color:var(--ink-2);display:flex;align-items:center;justify-content:center}
+
+/* board */
+main{padding-block:14px calc(104px + env(safe-area-inset-bottom,0px))}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(var(--pw),1fr))}
+.grid[data-size="s"]{--pw:118px;--ph:86px;--pf:15px}
+.grid[data-size="m"]{--pw:158px;--ph:112px;--pf:18px}
+.grid[data-size="l"]{--pw:212px;--ph:148px;--pf:23px}
+@media (max-width:440px){.grid[data-size="m"]{--pw:140px}.grid[data-size="l"]{--pw:160px}}
+.pad{--c:var(--p4);position:relative;height:var(--ph);min-width:0;border:0;border-radius:8px;padding:10px 12px 14px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;gap:4px;color:var(--pad-ink,#fff8ec);background-color:var(--c);background-image:linear-gradient(180deg,rgba(255,255,255,.17),rgba(255,255,255,0) 46%,rgba(0,0,0,.24));box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 -2px 0 rgba(0,0,0,.25),0 3px 0 rgba(0,0,0,.5);touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overflow:hidden;transition:transform .05s,box-shadow .05s,filter .05s}
+.c0{--c:var(--p0)}.c1{--c:var(--p1);--pad-ink:#1c150c}.c2{--c:var(--p2)}.c3{--c:var(--p3)}.c4{--c:var(--p4)}.c5{--c:var(--p5)}.c6{--c:var(--p6)}.c7{--c:var(--p7);--pad-ink:#1c150c}
+.pad.down{transform:translateY(2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.25),0 1px 0 rgba(0,0,0,.5);filter:brightness(1.2)}
+.pad-name{font-size:var(--pf);font-weight:600;line-height:1.1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;padding-right:4px}
+.pad-meta{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:500;opacity:.82;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
+.pad-meta svg.i{width:15px;height:15px}
+.pad-meta .g{overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;letter-spacing:.08em;font-size:11.5px}
+.pad-prog{position:absolute;left:0;bottom:0;height:5px;width:100%;transform-origin:left center;transform:scaleX(var(--p,0));background:currentColor;opacity:0}
+.pad.playing{outline:2px solid var(--ink);outline-offset:2px}
+.pad.playing .pad-prog{opacity:.8}
+.pad.loading{filter:saturate(.25) brightness(.65)}
+.pad.error{filter:saturate(.2) brightness(.55);background-image:repeating-linear-gradient(135deg,rgba(0,0,0,.25) 0 8px,transparent 8px 16px)}
+.pad-tag{margin-left:auto;flex:none;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:rgba(0,0,0,.24)}
+.grid.editing .pad{outline:1.5px dashed rgba(236,228,212,.6);outline-offset:2px}
+.grid.editing .pad-tag{display:none}
+.pad-edit{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:999px;background:rgba(0,0,0,.3);display:none;align-items:center;justify-content:center}
+.grid.editing .pad-edit{display:flex}
+.pad-edit svg.i{width:16px;height:16px}
+.add-tile{height:var(--ph);border-radius:8px;border:1.5px dashed var(--line);background:transparent;color:var(--ink-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:15px;font-weight:600}
+.empty{max-width:560px;margin:40px auto;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+.empty h2{font-family:var(--f-display);font-weight:400;font-size:30px;margin:0;text-wrap:balance}
+.empty p{margin:0;color:var(--ink-2);line-height:1.5;font-size:17px}
+.empty .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+/* dock */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:25;padding-top:18px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--ground) 72%,rgba(13,20,23,0))}
+.dock-in{display:flex;align-items:center;gap:10px}
+.now{flex:1;min-width:0;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;align-items:center}
+.now::-webkit-scrollbar{display:none}
+.now-empty{color:var(--ink-3);font-size:15px;white-space:nowrap}
+.np{flex:none;height:44px;display:inline-flex;align-items:center;gap:8px;padding:0 8px 0 12px;border-radius:999px;border:1px solid var(--line);background:var(--raise);font-size:15px;font-weight:600;max-width:240px}
+.np .dot{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.np .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.np .x{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);flex:none}
+.np .x svg.i{width:14px;height:14px}
+.stop-all{flex:none;height:56px;padding:0 22px;border-radius:var(--r);border:0;background:var(--ink);color:var(--ground);font-size:18px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;display:inline-flex;align-items:center;gap:10px;touch-action:manipulation}
+.stop-all.idle{background:var(--raise);color:var(--ink-2);border:1px solid var(--line)}
+
+/* settings */
+.pop{position:fixed;z-index:45;top:calc(64px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:min(380px,calc(100vw - 32px));max-height:calc(100% - 150px - env(safe-area-inset-top,0px));overflow:auto;-webkit-overflow-scrolling:touch;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px;box-shadow:0 18px 50px rgba(0,0,0,.55)}
+.pop h3{margin:0;font-family:var(--f-display);font-weight:400;font-size:20px}
+.pop-sec{display:flex;flex-direction:column;gap:8px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.note{margin:0;color:var(--ink-2);font-size:15px;line-height:1.45}
+.note b{color:var(--ink);font-weight:600}
+.note.small{font-size:14px;color:var(--ink-3)}
+.ghform{display:flex;gap:8px}
+.ghform input{flex:1;min-width:0;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--ground);padding:0 10px;font-size:15px}
+.lbl{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.seg{display:flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;width:max-content;max-width:100%}
+.seg button,.seg label{height:40px;padding:0 14px;border:0;background:transparent;font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px;color:var(--ink-2);cursor:pointer}
+.seg button+button,.seg label+label{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"],.seg label:has(input:checked){background:var(--ink);color:var(--ground)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.tog{display:flex;gap:12px;align-items:flex-start;cursor:pointer}
+.tog input{width:22px;height:22px;accent-color:var(--bronze);margin:2px 0 0;flex:none}
+.tog b{display:block;font-weight:600;font-size:16px}
+.tog small{display:block;color:var(--ink-2);font-size:14px;line-height:1.35;margin-top:2px}
+
+/* editor sheet */
+.sheet{position:fixed;inset:0;z-index:50;background:rgba(4,8,9,.74);display:flex;justify-content:center;padding:calc(10px + env(safe-area-inset-top,0px)) max(10px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}
+.sheet-panel{width:100%;max-width:1000px;background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.sheet-head{display:flex;align-items:center;gap:10px;padding:10px 14px 10px 18px;border-bottom:1px solid var(--line)}
+.sheet-head h2{margin:0;font-family:var(--f-display);font-weight:400;font-size:22px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sheet-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 18px 22px;display:flex;flex-direction:column;gap:18px;min-height:0}
+.ed-meta{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.2fr);gap:12px 14px}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0;border:0;padding:0;margin:0}
+.fld>span,.fld legend,.fld>.lbl{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:0}
+.fld input[type=text],.trim input{height:44px;border-radius:8px;border:1px solid var(--line);background:var(--ground);padding:0 12px;font-size:17px;min-width:0;width:100%}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.sw{position:relative;width:38px;height:38px;border-radius:8px;background:var(--c);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.sw input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.sw:has(input:checked){outline:2px solid var(--ink);outline-offset:2px}
+.sw:has(input:focus-visible){outline:2px solid var(--bronze);outline-offset:2px}
+.ed-colors{grid-column:1/-1}
+.wave-wrap{position:relative}
+#wave{display:block;width:100%;height:210px;border-radius:8px;background:var(--ground);touch-action:none;border:1px solid var(--line)}
+#overview{display:block;width:100%;height:44px;margin-top:8px;border-radius:6px;background:var(--ground);touch-action:none;border:1px solid var(--line)}
+.wave-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:var(--ink-2);font-size:16px;line-height:1.4}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sp{flex:1}
+.tools{margin-top:10px}
+.trims{display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) auto;gap:10px 14px;align-items:end;margin-top:12px}
+.trim{display:grid;grid-template-columns:auto minmax(70px,1fr) auto;gap:8px;align-items:center;min-width:0}
+.trim label{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.trim input{font-variant-numeric:tabular-nums}
+.readout{display:flex;gap:14px;color:var(--ink-2);font-size:15px;white-space:nowrap;height:44px;align-items:center}
+.readout b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.splits{margin-top:12px}
+.hint{color:var(--ink-3);font-size:14px}
+.finder{margin-top:10px;padding:14px;border:1px solid var(--line);border-radius:var(--r);background:var(--ground);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px;align-items:end}
+.finder label{display:flex;flex-direction:column;gap:4px;font-size:15px;color:var(--ink-2)}
+.finder output{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.finder-act{grid-column:1/-1;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.finder-act span{color:var(--ink-2);font-size:15px;flex:1;min-width:180px}
+.ed-play{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 18px;padding-top:16px;border-top:1px solid var(--line)}
+.ed-play .fld output{color:var(--ink);font-weight:600;letter-spacing:0;text-transform:none;font-variant-numeric:tabular-nums;margin-left:6px}
+.ed-play .wide{grid-column:span 2}
+.ed-foot{display:flex;gap:8px;flex-wrap:wrap;padding-top:16px;border-top:1px solid var(--line)}
+.src-note{margin:0;color:var(--ink-3);font-size:14px;line-height:1.45;overflow-wrap:anywhere}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;max-width:min(560px,calc(100vw - 32px));padding:12px 16px;border-radius:var(--r);background:var(--ink);color:var(--ground);font-size:16px;font-weight:500;line-height:1.35;box-shadow:0 10px 30px rgba(0,0,0,.5);pointer-events:none}
+
+@media (max-width:700px){
+  .ed-meta{grid-template-columns:1fr}
+  .trims{grid-template-columns:1fr}
+  .ed-play{grid-template-columns:1fr}
+  .ed-play .wide{grid-column:auto}
+  .finder{grid-template-columns:1fr}
+  #wave{height:160px}
+  .vol input{width:80px}
+  .brand{font-size:23px}
+}
+@media (max-width:520px){
+  .vol .lab{display:none}
+  .btn .lab{display:none}
+  .btn.keep .lab{display:inline}
+  .stop-all{padding:0 16px;font-size:16px}
+}
+@media (prefers-reduced-motion:reduce){.pad{transition:none}.spin svg.i{animation:none}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="bar">
+      <div class="brand"><b>ATO</b> Soundboard</div>
+      <div class="chips" id="chips"></div>
+      <div class="actions">
+        <label class="vol" title="Master volume"><svg class="i" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 9.5a3.5 3.5 0 0 1 0 5"/><path d="M19 7a7 7 0 0 1 0 10"/></svg><span class="lab">Volume</span><input id="master" type="range" min="0" max="100" step="1" aria-label="Master volume"></label>
+        <button class="btn icon" id="btnSync" aria-label="Sync with GitHub" title="Sync with GitHub"><svg class="i" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20v-4h-4"/></svg></button>
+        <button class="btn icon" id="btnSettings" aria-label="Settings" aria-expanded="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h8M16 7h4M4 17h3M11 17h9"/><circle cx="14" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
+        <button class="btn" id="btnEdit" aria-pressed="false" hidden><svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg><span class="lab" id="editLab">Edit</span></button>
+        <button class="btn primary keep" id="btnAdd" hidden><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span class="lab">Add sounds</span></button>
+      </div>
+    </div>
+    <div class="tabs-row">
+      <nav class="tabs" id="tabs" role="tablist" aria-label="Groups"></nav>
+      <div id="renameBox"></div>
+    </div>
+  </div>
+  <div class="meander" aria-hidden="true"></div>
+</header>
+
+<main class="wrap">
+  <div id="bannerBox"></div>
+  <div class="grid" id="grid" data-size="m"></div>
+  <div id="emptyBox"></div>
+</main>
+
+<div class="dock">
+  <div class="dock-in wrap">
+    <div class="now" id="now" aria-live="polite"></div>
+    <button class="stop-all idle" id="stopAll"><svg class="i f" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>Stop all</button>
+  </div>
+</div>
+
+<div class="pop" id="pop" hidden role="dialog" aria-label="Settings">
+  <h3>Settings</h3>
+  <section class="pop-sec">
+    <div class="lbl">Shared board</div>
+    <p class="note" id="syncInfo"></p>
+    <div class="row"><button class="btn sm" id="syncBtn2">Sync now</button><button class="btn sm danger" id="discardBtn" hidden>Discard unsaved changes</button></div>
+  </section>
+  <section class="pop-sec">
+    <div class="lbl">Adding and editing sounds</div>
+    <p class="note" id="ghInfo"></p>
+    <form class="ghform" id="ghForm"><input type="password" id="ghToken" placeholder="Paste your GitHub key" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="GitHub key"><button class="btn sm primary" id="ghConnect">Connect</button></form>
+    <p class="note small" id="ghHelp"></p>
+    <div class="row"><button class="btn sm" id="ghOut" hidden>Disconnect this device</button></div>
+  </section>
+  <div class="fld"><div class="lbl">Pad size</div>
+    <div class="seg" id="sizeSeg"><button data-size="s">Small</button><button data-size="m">Medium</button><button data-size="l">Large</button></div>
+  </div>
+  <label class="tog"><input type="checkbox" id="optInstant"><span><b>Play the moment a pad is touched</b><small>Faster, but scrolling over a pad will play it. Off means pads play when you lift your finger.</small></span></label>
+  <label class="tog" id="wakeRow"><input type="checkbox" id="optWake"><span><b>Keep screen on</b><small>Stops the iPad dimming and locking mid-session.</small></span></label>
+  <label class="tog" id="muteRow"><input type="checkbox" id="optMute"><span><b>Play even when the iPad is muted</b><small>Also pauses music playing from other apps.</small></span></label>
+  <div class="row">
+    <button class="btn sm" id="fsBtn">Full screen</button>
+    <button class="btn sm" id="starterBtn">Add starter sounds</button>
+  </div>
+  <p class="note small" id="storeInfo"></p>
+</div>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="edTitle">
+  <div class="sheet-panel">
+    <div class="sheet-head">
+      <h2 id="edTitle">Edit sound</h2>
+      <button class="btn ghost" id="edCancel">Cancel</button>
+      <button class="btn primary" id="edSave">Save</button>
+    </div>
+    <div class="sheet-body">
+      <section class="ed-meta">
+        <label class="fld"><span>Name</span><input type="text" id="edName" maxlength="60" autocomplete="off"></label>
+        <label class="fld"><span>Group</span><input type="text" id="edGroup" maxlength="30" list="groupList" autocomplete="off"></label>
+        <fieldset class="fld ed-colors"><legend>Colour</legend><div class="swatches" id="edColors"></div></fieldset>
+      </section>
+
+      <section id="edWaveSec">
+        <div class="wave-wrap"><canvas id="wave" aria-label="Waveform. Drag the handles to trim, tap to place the cursor."></canvas><div class="wave-msg" id="waveMsg" hidden></div></div>
+        <canvas id="overview" aria-label="Whole file overview. Drag to move around when zoomed in."></canvas>
+        <div class="row tools">
+          <button class="btn sm" id="edPlay"><svg class="i f" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg><span id="edPlayLab">Play clip</span></button>
+          <button class="btn sm" id="edPlayCur">Play from cursor</button>
+          <span class="sp"></span>
+          <button class="btn sm icon" id="zOut" aria-label="Zoom out">−</button>
+          <button class="btn sm icon" id="zIn" aria-label="Zoom in">+</button>
+          <button class="btn sm" id="zFit">Fit clip</button>
+          <button class="btn sm" id="zAll">Whole file</button>
+        </div>
+        <div class="trims">
+          <div class="trim"><label for="edStart">Start</label><input type="number" id="edStart" step="0.01" min="0" inputmode="decimal"><button class="btn sm" id="setStart">Cursor</button></div>
+          <div class="trim"><label for="edEnd">End</label><input type="number" id="edEnd" step="0.01" min="0" inputmode="decimal"><button class="btn sm" id="setEnd">Cursor</button></div>
+          <div class="readout"><span>Length <b id="edLen">—</b></span><span>Cursor <b id="edCur">—</b></span></div>
+        </div>
+        <div class="row splits">
+          <button class="btn sm" id="edSplit"><svg class="i" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.6 8.6L20 20M8.6 15.4L20 4"/></svg>Split at cursor</button>
+          <button class="btn sm" id="edFind" aria-expanded="false" aria-controls="finder">Find separate sounds</button>
+          <span class="hint">Splitting saves straight away. The original file is never changed.</span>
+        </div>
+        <div class="finder" id="finder" hidden>
+          <label>Silence below <output id="thrOut"></output><input type="range" id="thr" min="-60" max="-12" step="1" value="-36"></label>
+          <label>Gap of at least <output id="gapOut"></output><input type="range" id="gap" min="0.1" max="2" step="0.05" value="0.3"></label>
+          <div class="finder-act"><span id="findCount"></span><button class="btn primary sm" id="edMake" disabled>Make pads</button></div>
+        </div>
+      </section>
+
+      <section class="ed-play">
+        <label class="fld"><span>Volume <output id="volOut"></output></span><input type="range" id="edVol" min="0" max="200" step="1"></label>
+        <label class="fld"><span>Fade in <output id="fiOut"></output></span><input type="range" id="edFi" min="0" max="3000" step="10"></label>
+        <label class="fld"><span>Fade out <output id="foOut"></output></span><input type="range" id="edFo" min="0" max="3000" step="10"></label>
+        <label class="tog"><input type="checkbox" id="edLoop"><span><b>Loop until stopped</b><small>For ambience and music. Fade out is used when you stop it.</small></span></label>
+        <fieldset class="fld wide"><legend>Tapping it while it plays</legend>
+          <div class="seg" id="edRetap">
+            <label><input type="radio" name="retap" value="restart">Restarts it</label>
+            <label><input type="radio" name="retap" value="stop">Stops it</label>
+            <label><input type="radio" name="retap" value="layer">Plays another</label>
+          </div>
+        </fieldset>
+      </section>
+
+      <section class="ed-foot">
+        <button class="btn sm" id="edEarlier">Move earlier</button>
+        <button class="btn sm" id="edLater">Move later</button>
+        <button class="btn sm" id="edDup">Duplicate</button>
+        <span class="sp"></span>
+        <button class="btn sm danger" id="edDel">Delete</button>
+      </section>
+      <p class="src-note" id="srcNote"></p>
+    </div>
+  </div>
+</div>
+
+<datalist id="groupList"></datalist>
+<input type="file" id="file" multiple hidden accept="audio/*,.mp3,.m4a,.aac,.wav,.aif,.aiff,.caf,.flac,.ogg,.oga,.opus,.webm,.mp4">
+<div class="toast" id="toast" hidden role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- where the board lives ---------- */
+const CONFIG = window.ATO_CONFIG || (() => {
+  const h = location.hostname, seg = location.pathname.split('/').filter(Boolean);
+  if (/\.github\.io$/i.test(h) && seg.length) return { owner: h.split('.')[0], repo: seg[0], branch: 'board' };
+  return { owner: 'shacaska', repo: 'ato-soundboard', branch: 'board' };
+})();
+const API = CONFIG.api || 'https://api.github.com';
+const RAW = CONFIG.raw || 'https://raw.githubusercontent.com';
+const REPO = `${CONFIG.owner}/${CONFIG.repo}`;
+const KEY_URL = 'https://github.com/settings/tokens/new?description=' + encodeURIComponent('ATO Soundboard') + '&scopes=public_repo';
+
+/* ---------- small helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => { try { if (crypto.randomUUID) return crypto.randomUUID().replace(/-/g, '').slice(0, 16); } catch (e) {} return (Date.now().toString(36) + Math.random().toString(36).slice(2, 12)).slice(0, 16); };
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem('ato-sb:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { if (v == null) localStorage.removeItem('ato-sb:' + k); else localStorage.setItem('ato-sb:' + k, JSON.stringify(v)); } catch (e) {} }
+};
+const CSSV = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const FONT = '"Barlow Semi Condensed", "Arial Narrow", sans-serif';
+const MIN_CLIP = 0.01;
+const COLOR_N = 8;
+const MAX_FILE = 25 * 1048576;
+const ICON_LOOP = '<svg class="i" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg>';
+const ICON_X = '<svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+const ICON_PEN = '<svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>';
+
+function fmt(t) {
+  if (!isFinite(t)) return '—';
+  if (t < 60) return t.toFixed(t < 10 ? 2 : 1) + ' s';
+  const m = Math.floor(t / 60), s = t - m * 60;
+  return m + ':' + (s < 10 ? '0' : '') + s.toFixed(1);
+}
+function fmtShort(t) {
+  if (!isFinite(t)) return '';
+  if (t < 10) return t.toFixed(1) + 's';
+  if (t < 60) return Math.round(t) + 's';
+  const m = Math.floor(t / 60), s = Math.round(t - m * 60);
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+function fmtBytes(b) {
+  if (!isFinite(b)) return '—';
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b / 1024).toFixed(0) + ' KB';
+  if (b < 1073741824) return (b / 1048576).toFixed(1) + ' MB';
+  return (b / 1073741824).toFixed(2) + ' GB';
+}
+function ago(t) {
+  if (!t) return 'never';
+  const s = Math.round((Date.now() - t) / 1000);
+  if (s < 45) return 'just now';
+  if (s < 3600) return Math.round(s / 60) + ' min ago';
+  if (s < 86400) return Math.round(s / 3600) + ' h ago';
+  return new Date(t).toLocaleDateString();
+}
+function b64ToBytes(s) {
+  s = String(s).replace(/\s+/g, '');
+  if (typeof Uint8Array.fromBase64 === 'function') return Uint8Array.fromBase64(s);
+  const bin = atob(s); const u = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  return u;
+}
+function bytesToB64(u) {
+  if (typeof u.toBase64 === 'function') return u.toBase64();
+  let s = ''; const CH = 0x8000;
+  for (let i = 0; i < u.length; i += CH) s += String.fromCharCode.apply(null, u.subarray(i, i + CH));
+  return btoa(s);
+}
+function utf8ToB64(str) { return bytesToB64(new TextEncoder().encode(str)); }
+function extFor(name, mime) {
+  const e = (String(name).split('.').pop() || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (e && e.length <= 5 && e !== String(name).toLowerCase()) return e;
+  return ({ 'audio/mpeg':'mp3', 'audio/mp4':'m4a', 'audio/x-m4a':'m4a', 'audio/aac':'aac', 'audio/wav':'wav', 'audio/x-wav':'wav', 'audio/aiff':'aif', 'audio/flac':'flac', 'audio/ogg':'ogg', 'audio/webm':'webm' })[mime] || 'audio';
+}
+function prettyName(file) {
+  let n = file.replace(/\.[a-z0-9]{2,5}$/i, '').replace(/[_]+/g, ' ').replace(/\s*-\s*/g, ' – ').replace(/\s+/g, ' ').trim();
+  if (!n) n = 'New sound';
+  return (n.charAt(0).toUpperCase() + n.slice(1)).slice(0, 60);
+}
+const isNetErr = e => e instanceof TypeError || (e && (e.net || e.status >= 500 || e.status === 0));
+
+/* ---------- this device's storage (IndexedDB) ---------- */
+const IDB = (() => {
+  let dbp = null;
+  function open() {
+    if (dbp) return dbp;
+    dbp = new Promise((res, rej) => {
+      let r;
+      try { r = indexedDB.open('ato-soundboard-app', 1); } catch (e) { rej(e); return; }
+      r.onupgradeneeded = () => { const d = r.result; ['audio', 'meta'].forEach(s => { if (!d.objectStoreNames.contains(s)) d.createObjectStore(s); }); };
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+      r.onblocked = () => rej(new Error('blocked'));
+    });
+    dbp.catch(() => { dbp = null; });
+    return dbp;
+  }
+  async function tx(store, mode, fn) {
+    const d = await open();
+    return new Promise((res, rej) => {
+      const t = d.transaction(store, mode); const s = t.objectStore(store); let out;
+      const req = fn(s); if (req) req.onsuccess = () => { out = req.result; };
+      t.oncomplete = () => res(out); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error);
+    });
+  }
+  return {
+    get: (s, k) => tx(s, 'readonly', st => st.get(k)),
+    put: (s, k, v) => tx(s, 'readwrite', st => st.put(v, k)),
+    del: (s, k) => tx(s, 'readwrite', st => st.delete(k)),
+    keys: s => tx(s, 'readonly', st => st.getAllKeys())
+  };
+})();
+
+/* ---------- starter sounds (synthesised by the app, no files needed) ---------- */
+const STARTERS = [
+  { name:'Bronze strike', group:'Battle',  color:1, builtin:'strike',  fadeIn:0,    fadeOut:0,    volume:1,   loop:false, retap:'layer' },
+  { name:'Thunder',       group:'Battle',  color:5, builtin:'thunder', fadeIn:0,    fadeOut:600,  volume:1,   loop:false, retap:'restart' },
+  { name:'Temple gong',   group:'Moments', color:7, builtin:'gong',    fadeIn:0,    fadeOut:500,  volume:0.9, loop:false, retap:'restart' },
+  { name:'Rising dread',  group:'Mood',    color:6, builtin:'riser',   fadeIn:0,    fadeOut:0,    volume:0.9, loop:false, retap:'restart' },
+  { name:'Heartbeat',     group:'Mood',    color:0, builtin:'heart',   fadeIn:0,    fadeOut:300,  volume:1,   loop:true,  retap:'stop' },
+  { name:'Sea wind',      group:'Mood',    color:3, builtin:'wind',    fadeIn:1500, fadeOut:1500, volume:0.8, loop:true,  retap:'stop' }
+];
+function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+class Biquad {
+  constructor() { this.x1 = this.x2 = this.y1 = this.y2 = 0; }
+  set(type, f, q, sr) {
+    f = clamp(f, 10, sr * 0.45);
+    const w = 2 * Math.PI * f / sr, cs = Math.cos(w), sn = Math.sin(w), a = sn / (2 * q);
+    let b0, b1, b2;
+    if (type === 'lp') { b0 = (1 - cs) / 2; b1 = 1 - cs; b2 = b0; }
+    else if (type === 'hp') { b0 = (1 + cs) / 2; b1 = -(1 + cs); b2 = b0; }
+    else { b0 = a; b1 = 0; b2 = -a; }
+    const a0 = 1 + a;
+    this.b0 = b0 / a0; this.b1 = b1 / a0; this.b2 = b2 / a0; this.a1 = -2 * cs / a0; this.a2 = (1 - a) / a0;
+    return this;
+  }
+  run(x) { const y = this.b0 * x + this.b1 * this.x1 + this.b2 * this.x2 - this.a1 * this.y1 - this.a2 * this.y2; this.x2 = this.x1; this.x1 = x; this.y2 = this.y1; this.y1 = y; return y; }
+}
+function normalize(chs, target) { let p = 0; for (const c of chs) for (let i = 0; i < c.length; i++) { const v = Math.abs(c[i]); if (v > p) p = v; } if (p > 0) { const k = target / p; for (const c of chs) for (let i = 0; i < c.length; i++) c[i] *= k; } return chs; }
+function fadeTail(chs, n) { for (const c of chs) { const L = c.length; n = Math.min(n, L); for (let i = 0; i < n; i++) c[L - n + i] *= 1 - i / n; } }
+const SYNTH = {
+  gong(sr) {
+    const n = Math.floor(sr * 6), L = new Float32Array(n), R = new Float32Array(n), r = rng(11), f0 = 92;
+    const P = [[1,1,.55,.004],[1.47,.62,.8,.03],[1.98,.5,1,.06],[2.43,.42,1.3,.12],[2.95,.33,1.7,.18],[3.56,.26,2.2,.22],[4.18,.2,2.8,.26],[5.07,.14,3.6,.3],[6.11,.09,4.6,.3]];
+    for (const [ratio, amp, dec, att] of P) for (const [ch, det] of [[L, 0.9988], [R, 1.0012]]) {
+      const w = 2 * Math.PI * f0 * ratio * det / sr; let ph = r() * 6.283;
+      for (let i = 0; i < n; i++) { const t = i / sr; ch[i] += amp * (1 - Math.exp(-t / att)) * Math.exp(-t * dec) * Math.sin(ph); ph += w; }
+    }
+    const a = new Biquad().set('lp', 900, .7, sr), b = new Biquad().set('lp', 950, .7, sr), m = Math.floor(sr * .09);
+    for (let i = 0; i < m; i++) { const e = Math.exp(-i / sr * 55) * 1.4; L[i] += a.run(r() * 2 - 1) * e; R[i] += b.run(r() * 2 - 1) * e; }
+    fadeTail([L, R], Math.floor(sr * .4));
+    return normalize([L, R], .89);
+  },
+  strike(sr) {
+    const n = Math.floor(sr * 1.8), L = new Float32Array(n), R = new Float32Array(n), r = rng(3);
+    const P = [[523,1,3.2],[1187,.75,4.4],[1771,.62,5.5],[2459,.5,7],[3302,.38,9],[4410,.28,12],[5290,.2,15],[6950,.12,20]];
+    for (const [f, a, d] of P) for (const [ch, det] of [[L, .999], [R, 1.001]]) {
+      const w = 2 * Math.PI * f * det / sr; let ph = r() * 6.283;
+      for (let i = 0; i < n; i++) { const t = i / sr; ch[i] += a * Math.exp(-t * d) * Math.min(1, t / .0015) * Math.sin(ph); ph += w; }
+    }
+    const a = new Biquad().set('bp', 3800, 1.1, sr), b = new Biquad().set('bp', 3600, 1.1, sr), m = Math.floor(sr * .12);
+    for (let i = 0; i < m; i++) { const e = Math.exp(-i / sr * 50) * 6; L[i] += a.run(r() * 2 - 1) * e; R[i] += b.run(r() * 2 - 1) * e; }
+    fadeTail([L, R], Math.floor(sr * .2));
+    return normalize([L, R], .85);
+  },
+  thunder(sr) {
+    const n = Math.floor(sr * 7), L = new Float32Array(n), R = new Float32Array(n), r = rng(23);
+    const bumps = [[.12,.07,1],[.6,.35,.8],[1.5,.6,.95],[2.7,.9,.6],[4,1.2,.35]];
+    const la = new Biquad().set('lp', 160, .9, sr), lb = new Biquad().set('lp', 175, .9, sr);
+    let bl = 0, br = 0;
+    for (let i = 0; i < n; i++) {
+      const t = i / sr; let env = 0;
+      for (const [c, w, a] of bumps) { const x = (t - c) / w; env += a * Math.exp(-x * x); }
+      env *= 1 - Math.exp(-t / .03);
+      const w1 = r() * 2 - 1, w2 = r() * 2 - 1;
+      bl = (bl + .02 * w1) / 1.02; br = (br + .02 * (.6 * w1 + .4 * w2)) / 1.02;
+      L[i] = la.run(bl) * env; R[i] = lb.run(br) * env;
+    }
+    normalize([L, R], .8);
+    const ha = new Biquad().set('hp', 1800, .7, sr), hb = new Biquad().set('hp', 1700, .7, sr), m = Math.floor(sr * .7);
+    for (let i = 0; i < m; i++) {
+      const t = i / sr, e = Math.exp(-t * 8) * Math.min(1, t / .004);
+      const ca = r() < .02 ? (r() * 2 - 1) * 3 : 0, cb = r() < .02 ? (r() * 2 - 1) * 3 : 0;
+      L[i] += ha.run((r() * 2 - 1) * .5 + ca) * e * .9; R[i] += hb.run((r() * 2 - 1) * .5 + cb) * e * .9;
+    }
+    fadeTail([L, R], Math.floor(sr * .5));
+    return normalize([L, R], .89);
+  },
+  heart(sr) {
+    const n = Math.floor(sr * 60 / 66), L = new Float32Array(n);
+    const beat = (t0, amp, dec, f1, f2) => {
+      let ph = 0; const s = Math.floor(t0 * sr);
+      for (let i = s; i < n; i++) {
+        const t = (i - s) / sr, f = f2 + (f1 - f2) * Math.exp(-t * 30); ph += 2 * Math.PI * f / sr;
+        const e = amp * Math.min(1, t / .006) * Math.exp(-t * dec);
+        if (e < 1e-5 && t > .05) break;
+        L[i] += e * (Math.sin(ph) + .35 * Math.sin(2 * ph) + .12 * Math.sin(3 * ph));
+      }
+    };
+    beat(.01, 1, 16, 95, 42); beat(.29, .72, 22, 110, 48);
+    for (let i = 0; i < n; i++) L[i] = Math.tanh(L[i] * 1.6);
+    normalize([L], .9);
+    return [L, Float32Array.from(L)];
+  },
+  wind(sr) {
+    const len = 12, xf = 1.5, n = Math.floor(sr * len), m = n + Math.floor(sr * xf), X = m - n, r = rng(5), out = [];
+    for (let c = 0; c < 2; c++) {
+      const A = new Float32Array(m), bp = new Biquad(), bp2 = new Biquad(), lp = new Biquad().set('lp', 140, .7, sr); let b = 0;
+      for (let i = 0; i < m; i++) {
+        const t = i / sr, u = 2 * Math.PI * t / len;
+        if (i % 64 === 0) { const fc = 520 + 260 * Math.sin(u * 2 + c * .7) + 140 * Math.sin(u * 5 + 1.3); bp.set('bp', fc, 1.4, sr); bp2.set('bp', fc * 2.1, 2.2, sr); }
+        const w = r() * 2 - 1, gust = .55 + .3 * Math.sin(u + c * .4) + .15 * Math.sin(u * 3 + 2.1);
+        b = (b + .02 * w) / 1.02;
+        A[i] = bp.run(w) * gust * 3 + bp2.run(w) * gust * .8 * Math.max(0, Math.sin(u * 4 + c)) + lp.run(b) * 2.5 * (.7 + .3 * Math.sin(u * 2 + .5));
+      }
+      const o = new Float32Array(n);
+      for (let i = 0; i < n; i++) { if (i < X) { const a = i / X; o[i] = A[i] * Math.sqrt(a) + A[n + i] * Math.sqrt(1 - a); } else o[i] = A[i]; }
+      out.push(o);
+    }
+    return normalize(out, .8);
+  },
+  riser(sr) {
+    const dur = 5, n = Math.floor(sr * dur), L = new Float32Array(n), R = new Float32Array(n), r = rng(9), ba = new Biquad(), bb = new Biquad();
+    let p1 = 0, p2 = 0, p3 = 0;
+    for (let i = 0; i < n; i++) {
+      const t = i / sr, x = t / dur;
+      if (i % 64 === 0) { const fc = 150 * Math.pow(5200 / 150, x * x); ba.set('bp', fc, 3, sr); bb.set('bp', fc * 1.03, 3, sr); }
+      const ne = Math.pow(x, 2.2) * 3.2, f = 55 * Math.pow(2, x * x);
+      p1 += 2 * Math.PI * f / sr; p2 += 2 * Math.PI * f * 1.5 / sr; p3 += 2 * Math.PI * f * 1.007 / sr;
+      const drone = Math.tanh(1.8 * (Math.sin(p1) + .5 * Math.sin(p2) + .6 * Math.sin(p3))) * Math.pow(x, 1.4) * .45;
+      const end = t > dur - .04 ? (dur - t) / .04 : 1;
+      L[i] = (ba.run(r() * 2 - 1) * ne + drone) * end; R[i] = (bb.run(r() * 2 - 1) * ne + drone) * end;
+    }
+    return normalize([L, R], .85);
+  }
+};
+
+/* ---------- audio engine ---------- */
+const AC = window.AudioContext || window.webkitAudioContext;
+let ctx = null, master = null, everRan = false;
+function getCtx() {
+  if (!ctx) {
+    try { ctx = new AC({ latencyHint: 'interactive' }); } catch (e) { ctx = new AC(); }
+    master = ctx.createGain(); master.gain.value = state.master * state.master; master.connect(ctx.destination);
+    ctx.onstatechange = () => { if (ctx.state === 'running') everRan = true; renderChips(); };
+  }
+  return ctx;
+}
+function unlock() {
+  const c = getCtx();
+  if (c.state === 'running') return;
+  try { const b = c.createBuffer(1, 1, c.sampleRate), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); } catch (e) {}
+  const p = c.resume(); if (p && p.then) p.then(renderChips, () => {});
+}
+['pointerup', 'touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, true));
+
+function decode(bytes) {
+  const c = getCtx();
+  return new Promise((res, rej) => {
+    let done = false;
+    const ok = b => { if (!done) { done = true; res(b); } }, bad = e => { if (!done) { done = true; rej(e || new Error('decode failed')); } };
+    try { const p = c.decodeAudioData(bytes, ok, bad); if (p && p.then) p.then(ok, bad); } catch (e) { bad(e); }
+  });
+}
+
+const voices = new Set();
+let raf = 0, voicesDirty = false;
+function play(sound, opts) {
+  opts = opts || {};
+  const buf = opts.buf || bufFor(sound); if (!buf) return null;
+  const c = getCtx();
+  const start = clamp(+sound.start || 0, 0, buf.duration);
+  const end = clamp(sound.end == null ? buf.duration : +sound.end, start, buf.duration);
+  if (end - start < 0.005) return null;
+  const off = opts.from != null ? clamp(opts.from, start, end - 0.005) : start;
+  const t = c.currentTime + 0.004;
+  const src = c.createBufferSource(); src.buffer = buf;
+  const g = c.createGain(); src.connect(g); g.connect(master);
+  const vol = clamp(sound.volume == null ? 1 : +sound.volume, 0, 2);
+  let fi = Math.max(0.003, (+sound.fadeIn || 0) / 1000), fo = Math.max(0.003, (+sound.fadeOut || 0) / 1000);
+  const dur = end - off;
+  g.gain.setValueAtTime(0, t);
+  if (sound.loop) {
+    src.loop = true; src.loopStart = start; src.loopEnd = end;
+    g.gain.linearRampToValueAtTime(vol, t + fi);
+    src.start(t, off);
+  } else {
+    if (fi + fo > dur) { const k = dur / (fi + fo); fi *= k; fo *= k; }
+    g.gain.linearRampToValueAtTime(vol, t + fi);
+    g.gain.setValueAtTime(vol, t + dur - fo);
+    g.gain.linearRampToValueAtTime(0, t + dur);
+    src.start(t, off, dur);
+  }
+  const v = { sid: sound.id, src, g, t0: t, off, start, end, loop: !!sound.loop, stopFade: sound.loop ? Math.max(0.06, (+sound.fadeOut || 0) / 1000) : 0.06, preview: !!opts.preview, stopping: false };
+  src.onended = () => { voices.delete(v); try { g.disconnect(); } catch (e) {} voicesChanged(); };
+  voices.add(v); voicesChanged();
+  if (!raf) raf = requestAnimationFrame(tick);
+  return v;
+}
+function stopVoice(v, fade) {
+  if (!v || v.stopping) return;
+  v.stopping = true;
+  const now = ctx.currentTime, f = fade == null ? v.stopFade : fade, p = v.g.gain;
+  try {
+    if (typeof p.cancelAndHoldAtTime === 'function') p.cancelAndHoldAtTime(now);
+    else { const cur = p.value; p.cancelScheduledValues(now); p.setValueAtTime(cur, now); }
+    p.linearRampToValueAtTime(0, now + f);
+    v.src.stop(now + f + 0.02);
+  } catch (e) { try { v.src.stop(); } catch (e2) {} }
+  voicesChanged();
+}
+function stopSound(id, fade) { for (const v of voices) if (v.sid === id && !v.preview) stopVoice(v, fade); }
+function stopAll() { for (const v of voices) stopVoice(v, Math.max(0.25, v.loop ? v.stopFade : 0.25)); if (ed.open) ed.preview = null; }
+function liveVoices(id) { const out = []; for (const v of voices) if (v.sid === id && !v.preview && !v.stopping) out.push(v); return out; }
+function trigger(s) {
+  const k = padKey(s);
+  if (!buffers.has(k)) { toast(failed.has(k) ? `“${s.name}” isn't available: ${failed.get(k).message}` : `“${s.name}” is still downloading.`); return; }
+  const live = liveVoices(s.id);
+  const mode = s.retap || (s.loop ? 'stop' : 'restart');
+  if (live.length) {
+    if (mode === 'stop') { live.forEach(v => stopVoice(v)); return; }
+    if (mode === 'restart') live.forEach(v => stopVoice(v, 0.02));
+  }
+  play(s);
+}
+function voicesChanged() {
+  if (voicesDirty) return; voicesDirty = true;
+  Promise.resolve().then(() => {
+    voicesDirty = false;
+    if (ed.preview && !voices.has(ed.preview)) { ed.preview = null; }
+    updatePlaying(); renderNow(); if (ed.open) { updatePlayBtn(); drawWave(); }
+  });
+}
+function voicePos(v) {
+  const el = ctx.currentTime - v.t0, len = v.end - v.start;
+  if (el < 0) return v.off;
+  if (v.loop) return v.start + ((v.off - v.start) + el) % len;
+  return Math.min(v.end, v.off + el);
+}
+function tick() {
+  raf = 0;
+  const latest = new Map();
+  for (const v of voices) if (!v.preview && !v.stopping) latest.set(v.sid, v);
+  for (const [sid, v] of latest) {
+    const el = padEls.get(sid); if (!el) continue;
+    const p = (voicePos(v) - v.start) / Math.max(1e-6, v.end - v.start);
+    el.style.setProperty('--p', clamp(p, 0, 1).toFixed(4));
+  }
+  if (ed.open && ed.preview) drawWave();
+  if (voices.size) raf = requestAnimationFrame(tick);
+}
+
+/* ---------- audio buffers ---------- */
+const buffers = new Map(), loading = new Map(), failed = new Map(), peaksCache = new Map();
+function padKey(p) { return p.builtin ? 'b:' + p.builtin : 'f:' + p.file; }
+function bufFor(s) { return buffers.get(padKey(s)) || null; }
+function rawUrl(path) { return `${RAW}/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${String(path).split('/').map(encodeURIComponent).join('/')}`; }
+const queue = []; let active = 0;
+function ensureBuffers() {
+  for (const s of state.sounds) {
+    const k = padKey(s);
+    if (buffers.has(k) || loading.has(k) || failed.has(k)) continue;
+    loading.set(k, true); queue.push([k, s]);
+  }
+  pump(); renderChips();
+}
+function pump() {
+  while (active < 3 && queue.length) {
+    const [k, pad] = queue.shift(); active++;
+    loadPad(pad).then(b => { buffers.set(k, b); failed.delete(k); }, e => { failed.set(k, e); })
+      .finally(() => { loading.delete(k); active--; renderGrid(); renderChips(); pump(); });
+  }
+}
+async function loadPad(p) {
+  if (p.builtin) {
+    const fn = SYNTH[p.builtin]; if (!fn) throw new Error('this version of the app doesn\'t know that starter sound');
+    await new Promise(r => setTimeout(r, 0));
+    const c = getCtx(), chs = fn(c.sampleRate), b = c.createBuffer(chs.length, chs[0].length, c.sampleRate);
+    chs.forEach((d, i) => { if (b.copyToChannel) b.copyToChannel(d, i); else b.getChannelData(i).set(d); });
+    return b;
+  }
+  let ab = null;
+  try { ab = await IDB.get('audio', p.file); } catch (e) {}
+  if (!ab) {
+    let r;
+    try { r = await fetch(rawUrl(p.file)); } catch (e) { const err = new Error('it hasn\'t downloaded yet and this device is offline'); err.net = true; throw err; }
+    if (!r.ok) { const err = new Error(r.status === 404 ? 'GitHub doesn\'t have the file yet. Sync again in a minute.' : 'the download failed (' + r.status + ')'); err.net = true; throw err; }
+    ab = await r.arrayBuffer();
+    try { await IDB.put('audio', p.file, ab); } catch (e) {}
+  }
+  try { return await decode(ab); }
+  catch (e) { throw new Error('this device can\'t read “' + (p.original || p.file) + '”. MP3, M4A, WAV, AIFF and FLAC work best'); }
+}
+function peaksFor(k, buf) {
+  if (peaksCache.has(k)) return peaksCache.get(k);
+  const bin = 256, c0 = buf.getChannelData(0), c1 = buf.numberOfChannels > 1 ? buf.getChannelData(1) : null;
+  const nb = Math.ceil(buf.length / bin), mn = new Float32Array(nb), mx = new Float32Array(nb); let peak = 0;
+  for (let b = 0; b < nb; b++) {
+    let lo = 1, hi = -1; const s = b * bin, e = Math.min(s + bin, buf.length);
+    for (let i = s; i < e; i++) { const v = c1 ? (c0[i] + c1[i]) * 0.5 : c0[i]; if (v < lo) lo = v; if (v > hi) hi = v; }
+    mn[b] = lo; mx[b] = hi; const a = Math.max(-lo, hi); if (a > peak) peak = a;
+  }
+  const P = { bin, mn, mx, peak: peak || 1 }; peaksCache.set(k, P); return P;
+}
+
+/* ---------- GitHub ---------- */
+const GH = { token: LS.get('token', ''), login: LS.get('login', ''), canEdit: !!LS.get('canEdit', false), bad: false };
+async function ghReq(method, path, body, opts) {
+  opts = opts || {};
+  const h = { Accept: 'application/vnd.github+json' };
+  const tok = opts.token != null ? opts.token : GH.token;
+  if (tok) h.Authorization = 'Bearer ' + tok;
+  if (body) h['Content-Type'] = 'application/json';
+  if (opts.etag) h['If-None-Match'] = opts.etag;
+  const r = await fetch(API + path, { method, headers: h, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' });
+  if (r.status === 304) return { notModified: true };
+  const txt = await r.text(); let data = null;
+  try { data = txt ? JSON.parse(txt) : null; } catch (e) {}
+  if (!r.ok) {
+    const e = new Error((data && data.message) || ('GitHub said ' + r.status));
+    e.status = r.status; e.rate = r.headers.get('x-ratelimit-remaining') === '0' || r.status === 429;
+    throw e;
+  }
+  return { data, etag: r.headers.get('etag') || '' };
+}
+const rp = p => `/repos/${CONFIG.owner}/${CONFIG.repo}${p}`;
+function parseBoardJSON(text) {
+  const j = JSON.parse(text);
+  const pads = Array.isArray(j && j.pads) ? j.pads.filter(p => p && typeof p.id === 'string' && (p.file || p.builtin)) : [];
+  return { format: 1, pads };
+}
+async function readBoard(ref, etag) {
+  const r = await ghReq('GET', rp('/contents/board.json?ref=' + encodeURIComponent(ref)), null, { etag });
+  if (r.notModified) return null;
+  return { board: parseBoardJSON(new TextDecoder().decode(b64ToBytes(r.data.content || ''))), etag: r.etag };
+}
+
+/* edits are small "operations" applied to the newest board, so two people editing don't overwrite each other */
+function applyOp(board, op) {
+  const pads = board.pads.slice();
+  const at = id => pads.findIndex(p => p.id === id);
+  if (op.type === 'add') { for (const p of op.pads) if (at(p.id) < 0) pads.push(p); }
+  else if (op.type === 'update') { const i = at(op.id); if (i >= 0) pads[i] = Object.assign({}, pads[i], op.fields, { id: pads[i].id, file: pads[i].file || null, builtin: pads[i].builtin || null }); }
+  else if (op.type === 'remove') { const s = new Set(op.ids); for (let i = pads.length - 1; i >= 0; i--) if (s.has(pads[i].id)) pads.splice(i, 1); }
+  else if (op.type === 'regroup') { for (let i = 0; i < pads.length; i++) if (groupOf(pads[i]) === op.from) pads[i] = Object.assign({}, pads[i], { group: op.to }); }
+  else if (op.type === 'order') { for (const [id, o] of op.changes) { const i = at(id); if (i >= 0) pads[i] = Object.assign({}, pads[i], { order: o }); } }
+  return { format: 1, pads };
+}
+function opLabel(op) {
+  if (op.type === 'add') return op.pads.length === 1 ? `Add “${op.pads[0].name}”` : `Add ${op.pads.length} pads`;
+  if (op.type === 'update') return `Edit “${op.name || 'pad'}”`;
+  if (op.type === 'remove') return op.ids.length === 1 ? `Delete “${op.name || 'pad'}”` : `Delete ${op.ids.length} pads`;
+  if (op.type === 'regroup') return `Rename group ${op.from} → ${op.to}`;
+  if (op.type === 'order') return 'Reorder pads';
+  return 'Update board';
+}
+const filesIn = board => new Set(board.pads.filter(p => p.file).map(p => p.file));
+async function commitOps(ops) {
+  // upload new sound files once; keep their ids so retries don't re-upload
+  for (const op of ops) for (const f of op.files || []) {
+    if (!f.sha) { f.sha = (await ghReq('POST', rp('/git/blobs'), { content: f.b64, encoding: 'base64' })).data.sha; savePending(); }
+  }
+  const message = (ops.length === 1 ? opLabel(ops[0]) : ops.slice(0, 4).map(opLabel).join('; ') + (ops.length > 4 ? '; …' : '')) + (GH.login ? ` (by ${GH.login})` : '');
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const head = (await ghReq('GET', rp('/git/ref/heads/' + CONFIG.branch))).data.object.sha;
+    const baseTree = (await ghReq('GET', rp('/git/commits/' + head))).data.tree.sha;
+    const cur = (await readBoard(head)).board;
+    let next = cur; for (const op of ops) next = applyOp(next, op);
+    const before = filesIn(cur), after = filesIn(next), added = new Map();
+    for (const op of ops) for (const f of op.files || []) added.set(f.path, f.sha);
+    const tree = [];
+    for (const [path, sha] of added) if (after.has(path) && !before.has(path)) tree.push({ path, mode: '100644', type: 'blob', sha });
+    for (const path of before) if (!after.has(path)) tree.push({ path, mode: '100644', type: 'blob', sha: null });
+    tree.push({ path: 'board.json', mode: '100644', type: 'blob', content: JSON.stringify(next, null, 2) + '\n' });
+    const t = (await ghReq('POST', rp('/git/trees'), { base_tree: baseTree, tree })).data.sha;
+    const c = (await ghReq('POST', rp('/git/commits'), { message, tree: t, parents: [head] })).data.sha;
+    try { await ghReq('PATCH', rp('/git/refs/heads/' + CONFIG.branch), { sha: c, force: false }); return next; }
+    catch (e) { if (e.status === 422 || e.status === 409) { await new Promise(r => setTimeout(r, 300 + Math.random() * 700)); continue; } throw e; }
+  }
+  throw new Error('someone else kept saving at the same moment');
+}
+
+/* ---------- sync + write queue ---------- */
+const sync = { remote: null, etag: '', at: LS.get('syncAt', 0), busy: false, offline: false, error: '', lastWrite: 0, loaded: false };
+const writer = { pending: [], busy: false, retryT: 0, notified: false };
+function savePending() { IDB.put('meta', 'pending', writer.pending).catch(() => {}); }
+function saveRemote() { IDB.put('meta', 'remote', sync.remote).catch(() => {}); IDB.put('meta', 'etag', sync.etag).catch(() => {}); }
+function recompute() {
+  let b = sync.remote || { format: 1, pads: [] };
+  for (const op of writer.pending) b = applyOp(b, op);
+  setSounds(b.pads.map(p => Object.assign({}, p)));
+}
+function enqueue(ops) {
+  if (!canEdit()) { toast('Connect a GitHub key in Settings to make changes.'); return; }
+  for (const op of [].concat(ops)) writer.pending.push(op);
+  savePending(); recompute(); kickWriter();
+}
+async function kickWriter() {
+  if (writer.busy || !writer.pending.length || !canEdit() || writer.retryT) { renderChips(); return; }
+  writer.busy = true; renderChips();
+  const batch = writer.pending.slice();
+  try {
+    const board = await commitOps(batch);
+    writer.pending.splice(0, batch.length);
+    sync.remote = board; sync.etag = ''; sync.at = Date.now(); sync.lastWrite = Date.now(); sync.offline = false; LS.set('syncAt', sync.at);
+    saveRemote(); savePending(); recompute(); writer.notified = false;
+  } catch (e) {
+    if (isNetErr(e) || e.rate) {
+      if (!writer.notified) { toast('Couldn\'t reach GitHub. Your changes are kept on this device and will save when you\'re back online.', 6000); writer.notified = true; }
+      writer.retryT = setTimeout(() => { writer.retryT = 0; kickWriter(); }, 20000);
+    } else if (e.status === 401) {
+      GH.bad = true; toast('GitHub didn\'t accept your key. It may have expired. Add a new one in Settings; your changes are kept.', 7000);
+    } else if (e.status === 403 || e.status === 404) {
+      GH.bad = true; toast(`This GitHub account can't save to ${REPO}. Unsaved changes are kept until you discard them in Settings.`, 7000);
+    } else {
+      writer.pending.splice(0, batch.length); savePending(); recompute();
+      toast('Couldn\'t save that change: ' + e.message, 7000);
+    }
+  }
+  writer.busy = false; renderAll();
+  if (writer.pending.length && !writer.retryT && !GH.bad) kickWriter();
+}
+async function syncNow(manual) {
+  if (sync.busy) return;
+  if (!manual && Date.now() - sync.lastWrite < 20000) return;
+  if (navigator.onLine === false) { sync.offline = true; renderChips(); if (manual) toast('You\'re offline. Playing what\'s saved on this device.'); return; }
+  sync.busy = true; setSpin(true); renderChips();
+  let changed = false;
+  try {
+    const r = await readBoard(CONFIG.branch, sync.remote ? sync.etag : '');
+    sync.offline = false; sync.error = '';
+    if (r) { changed = JSON.stringify(r.board) !== JSON.stringify(sync.remote); sync.remote = r.board; sync.etag = r.etag; saveRemote(); }
+    sync.at = Date.now(); LS.set('syncAt', sync.at);
+    for (const [k, e] of failed) if (e && e.net) failed.delete(k);
+    recompute();
+    if (changed) cleanAudioCache();
+    if (manual) toast(changed ? 'Board updated.' : 'Already up to date.');
+  } catch (e) {
+    if (isNetErr(e)) { sync.offline = true; if (manual) toast('Can\'t reach GitHub. Playing what\'s saved on this device.'); }
+    else if (e.rate) { sync.error = 'GitHub\'s hourly limit for this network was reached, so syncing is paused for a while.'; if (manual) toast(sync.error, 6000); }
+    else { sync.error = e.message; if (manual) toast('Sync failed: ' + e.message, 6000); }
+  }
+  sync.busy = false; setSpin(false); renderAll();
+  if (writer.pending.length) kickWriter();
+}
+async function cleanAudioCache() {
+  try {
+    const keep = new Set(state.sounds.filter(s => s.file).map(s => s.file));
+    for (const op of writer.pending) for (const f of op.files || []) keep.add(f.path);
+    for (const k of await IDB.keys('audio')) if (!keep.has(k)) await IDB.del('audio', k);
+  } catch (e) {}
+}
+function setSpin(on) { $('#btnSync').classList.toggle('spin', on); $('#btnSync').disabled = on; }
+const canEdit = () => !!(GH.token && GH.canEdit && !GH.bad);
+async function connectKey(token) {
+  token = String(token || '').trim();
+  if (!token) return;
+  const b = $('#ghConnect'); b.disabled = true;
+  try {
+    const u = (await ghReq('GET', '/user', null, { token })).data;
+    const repo = (await ghReq('GET', rp(''), null, { token })).data;
+    const push = !!(repo.permissions && repo.permissions.push);
+    GH.token = token; GH.login = u.login; GH.canEdit = push; GH.bad = false;
+    LS.set('token', token); LS.set('login', u.login); LS.set('canEdit', push);
+    $('#ghToken').value = '';
+    toast(push ? `Connected as ${u.login}. You can add and edit sounds now.` : `Connected as ${u.login}, but that account can't edit ${REPO} yet. Ask ${CONFIG.owner} to add you as a collaborator, accept the invite, then connect again.`, push ? 4000 : 9000);
+  } catch (e) {
+    toast(e.status === 401 ? 'GitHub didn\'t accept that key. Check you copied all of it.' : 'Couldn\'t check the key: ' + e.message, 7000);
+  }
+  b.disabled = false; renderAll(); renderPopInfo(); kickWriter();
+}
+function disconnectKey() {
+  GH.token = ''; GH.login = ''; GH.canEdit = false; GH.bad = false;
+  LS.set('token', null); LS.set('login', null); LS.set('canEdit', null);
+  state.edit = false; renderAll(); renderPopInfo();
+}
+
+/* ---------- app state ---------- */
+const state = {
+  sounds: [], byId: new Map(),
+  group: LS.get('group', 'All'), edit: false,
+  size: LS.get('size', 'm'), master: clamp(+LS.get('master', 0.9) || 0, 0, 1),
+  instant: !!LS.get('instant', false), wake: !!LS.get('wake', false), ignoreMute: !!LS.get('ignoreMute', false)
+};
+const groupOf = s => ((s.group || '').trim() || 'General');
+function setSounds(list) {
+  list.sort((a, b) => ((+a.order || 0) - (+b.order || 0)) || String(a.added || '').localeCompare(String(b.added || '')) || String(a.name).localeCompare(String(b.name)));
+  state.sounds = list; state.byId = new Map(list.map(s => [s.id, s]));
+  if (state.group !== 'All' && !list.some(s => groupOf(s) === state.group)) state.group = 'All';
+  if (ed.open && !state.byId.has(ed.id)) closeEditor(true);
+  ensureBuffers(); renderAll();
+}
+function groups() { const m = new Map(); for (const s of state.sounds) { const g = groupOf(s); m.set(g, (m.get(g) || 0) + 1); } return Array.from(m); }
+function visible() { return state.group === 'All' ? state.sounds : state.sounds.filter(s => groupOf(s) === state.group); }
+function orderAfter(id, parts) {
+  const list = state.sounds, i = list.findIndex(s => s.id === id), cur = list[i];
+  const a = cur ? (+cur.order || 0) : 0, nx = list[i + 1];
+  const b = nx && (+nx.order || 0) > a ? +nx.order : a + 1;
+  const n = parts || 1, out = [];
+  for (let k = 1; k <= n; k++) out.push(+(a + (b - a) * k / (n + 1)).toFixed(6));
+  return out;
+}
+function maxOrder() { return state.sounds.reduce((m, s) => Math.max(m, +s.order || 0), 0); }
+function cleanPad(d) {
+  return {
+    id: d.id,
+    name: String(d.name || 'Untitled').trim().slice(0, 60) || 'Untitled',
+    group: String(d.group || '').trim().slice(0, 30) || 'General',
+    color: ((d.color | 0) % COLOR_N + COLOR_N) % COLOR_N,
+    file: d.file || null, builtin: d.builtin || null,
+    original: d.original || null, size: d.size || null,
+    start: Math.max(0, +(+d.start || 0).toFixed(4)),
+    end: d.end == null ? null : +(+d.end).toFixed(4),
+    fadeIn: clamp(d.fadeIn | 0, 0, 10000), fadeOut: clamp(d.fadeOut | 0, 0, 10000),
+    volume: +clamp(d.volume == null ? 1 : +d.volume, 0, 2).toFixed(3),
+    loop: !!d.loop,
+    retap: ['restart', 'stop', 'layer'].indexOf(d.retap) >= 0 ? d.retap : (d.loop ? 'stop' : 'restart'),
+    order: +d.order || 0,
+    added: d.added || new Date().toISOString(),
+    addedBy: d.addedBy || null
+  };
+}
+function fieldsOf(d) { const c = cleanPad(d); delete c.id; delete c.file; delete c.builtin; return c; }
+
+/* ---------- rendering ---------- */
+const grid = $('#grid'), padEls = new Map();
+function renderAll() { renderTabs(); renderGrid(); renderChips(); renderBanner(); renderNow(); renderEditBtn(); renderGroupList(); if (!pop.hidden) renderPopInfo(); }
+function renderTabs() {
+  const gs = groups(), tabs = [['All', state.sounds.length]].concat(gs);
+  $('#tabs').innerHTML = tabs.map(([g, n]) => `<button class="tab" role="tab" data-g="${esc(g)}" aria-selected="${g === state.group}">${esc(g)}<span class="n">${n}</span></button>`).join('');
+  const rb = $('#renameBox');
+  if (state.edit && state.group !== 'All' && canEdit()) { if (!rb.querySelector('input')) rb.innerHTML = `<button class="btn sm" id="renameBtn">Rename group</button>`; }
+  else rb.innerHTML = '';
+}
+function renderGrid() {
+  grid.dataset.size = state.size;
+  grid.classList.toggle('editing', state.edit);
+  const list = visible();
+  padEls.clear();
+  grid.innerHTML = list.map(s => {
+    const k = padKey(s), b = buffers.get(k), err = failed.has(k);
+    const len = b ? Math.max(0, clamp(s.end == null ? b.duration : +s.end, 0, b.duration) - (+s.start || 0)) : NaN;
+    const meta = err ? 'Not available' : (b ? fmtShort(len) : 'Downloading…');
+    const cls = ['pad', 'c' + (((s.color | 0) % COLOR_N + COLOR_N) % COLOR_N)];
+    if (!b && !err) cls.push('loading'); if (err) cls.push('error');
+    return `<button class="${cls.join(' ')}" data-id="${esc(s.id)}" aria-pressed="false">
+      <span class="pad-name">${esc(s.name)}</span>
+      <span class="pad-meta"><span>${meta}</span>${s.loop ? ICON_LOOP : ''}${state.group === 'All' ? `<span class="g">${esc(groupOf(s))}</span>` : ''}${s.builtin ? '<span class="pad-tag">Starter</span>' : ''}</span>
+      <span class="pad-edit" aria-hidden="true">${ICON_PEN}</span>
+      <span class="pad-prog"></span></button>`;
+  }).join('') + (state.edit && canEdit() ? `<button class="add-tile" id="addTile"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add sounds</button>` : '');
+  $$('.pad', grid).forEach(el => padEls.set(el.dataset.id, el));
+  updatePlaying();
+  const eb = $('#emptyBox');
+  if (state.sounds.length) { eb.innerHTML = ''; return; }
+  if (!sync.loaded || (!sync.remote && sync.busy)) eb.innerHTML = `<div class="empty"><p>Loading the board from GitHub…</p></div>`;
+  else if (!sync.remote && sync.offline) eb.innerHTML = `<div class="empty"><h2>Not downloaded yet</h2><p>Connect to the internet once so the board and its sounds can download. After that it works offline.</p></div>`;
+  else if (!sync.remote && sync.error) eb.innerHTML = `<div class="empty"><h2>Couldn't load the board</h2><p>${esc(sync.error)}</p><div class="row"><button class="btn" data-act="sync">Try again</button></div></div>`;
+  else eb.innerHTML = `<div class="empty"><h2>No sounds yet</h2>${canEdit()
+    ? `<p>Add MP3, M4A, WAV, AIFF or FLAC files from your Files app. After adding, open Edit to trim them or split one file into several pads.</p><div class="row"><button class="btn primary" data-act="add">Add sounds</button><button class="btn" data-act="starters">Add starter sounds</button></div>`
+    : `<p>Nothing on this board yet. To add sounds, connect a GitHub key in Settings.</p>`}</div>`;
+}
+function updatePlaying() {
+  for (const [id, el] of padEls) {
+    const on = liveVoices(id).length > 0;
+    el.classList.toggle('playing', on); el.setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (!on) el.style.removeProperty('--p');
+  }
+  const any = Array.from(voices).some(v => !v.preview && !v.stopping);
+  $('#stopAll').classList.toggle('idle', !any);
+}
+function renderNow() {
+  const ids = [], count = new Map();
+  for (const v of voices) if (!v.preview && !v.stopping) { if (!count.has(v.sid)) ids.push(v.sid); count.set(v.sid, (count.get(v.sid) || 0) + 1); }
+  const box = $('#now');
+  if (!ids.length) { box.innerHTML = `<span class="now-empty">Nothing playing</span>`; return; }
+  box.innerHTML = ids.map(id => {
+    const s = state.byId.get(id); if (!s) return '';
+    const n = count.get(id);
+    return `<button class="np c${(s.color | 0) % COLOR_N}" data-stop="${esc(id)}" aria-label="Stop ${esc(s.name)}"><span class="dot"></span><span class="nm">${esc(s.name)}${n > 1 ? ' ×' + n : ''}</span><span class="x">${ICON_X}</span></button>`;
+  }).join('');
+}
+function renderChips() {
+  const out = [];
+  const st = ctx ? ctx.state : 'none';
+  if (st !== 'running') out.push(`<button class="chip-s warn" id="soundChip">${everRan ? 'Sound paused · tap to resume' : 'Tap any pad to start sound'}</button>`);
+  const n = writer.pending.length;
+  if (n) out.push(`<button class="chip-s${writer.busy ? '' : ' warn'}" data-act="settings">${writer.busy ? `Saving${n > 1 ? ' ' + n + ' changes' : ''}…` : `${n} change${n > 1 ? 's' : ''} not saved yet`}</button>`);
+  if (sync.offline) out.push(`<span class="chip-s">Offline · playing saved sounds</span>`);
+  if (loading.size) out.push(`<span class="chip-s">Downloading ${loading.size} sound${loading.size > 1 ? 's' : ''}…</span>`);
+  $('#chips').innerHTML = out.join('');
+}
+const standalone = !!(navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches));
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function renderBanner() {
+  const box = $('#bannerBox');
+  if (isIOS && !standalone && !LS.get('hideInstall', false)) {
+    box.innerHTML = `<div class="banner"><span><b>Install it on this iPad:</b> tap the Share button, then <b>Add to Home Screen</b>. It then opens full screen and works offline. Connect your GitHub key inside the installed app, not here.</span><button class="x" data-act="hideInstall" aria-label="Hide">${ICON_X}</button></div>`;
+  } else box.innerHTML = '';
+}
+function renderEditBtn() {
+  const b = $('#btnEdit'), can = canEdit();
+  b.hidden = !can; $('#btnAdd').hidden = !can;
+  if (!can) state.edit = false;
+  b.classList.toggle('on', state.edit); b.setAttribute('aria-pressed', state.edit ? 'true' : 'false');
+  $('#editLab').textContent = state.edit ? 'Done' : 'Edit';
+}
+function renderGroupList() { $('#groupList').innerHTML = groups().map(([g]) => `<option value="${esc(g)}"></option>`).join(''); }
+
+let toastT = 0;
+function toast(msg, ms) {
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastT); if (ms !== 0) toastT = setTimeout(() => { t.hidden = true; }, ms || 3400);
+}
+
+/* ---------- pad input ---------- */
+let press = null;
+grid.addEventListener('pointerdown', e => {
+  const pad = e.target.closest('.pad'); if (!pad || state.edit) return;
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  const s = state.byId.get(pad.dataset.id); if (!s) return;
+  pad.classList.add('down');
+  press = { id: s.id, el: pad, x: e.clientX, y: e.clientY, pid: e.pointerId, fired: false };
+  if (state.instant) { const c = getCtx(); if (c.state === 'running') { trigger(s); press.fired = true; } }
+});
+grid.addEventListener('pointermove', e => {
+  if (!press || e.pointerId !== press.pid) return;
+  if (Math.hypot(e.clientX - press.x, e.clientY - press.y) > 12) { press.el.classList.remove('down'); if (!press.fired) press = null; }
+});
+function endPress(e, cancel) {
+  if (!press || e.pointerId !== press.pid) return;
+  const p = press; press = null; p.el.classList.remove('down');
+  if (cancel || p.fired) return;
+  const s = state.byId.get(p.id); if (!s) return;
+  const c = getCtx();
+  if (c.state === 'running') trigger(s);
+  else { unlock(); const r = c.resume(); if (r && r.then) r.then(() => trigger(s), () => toast('Sound is blocked. Tap the pad again.')); }
+}
+grid.addEventListener('pointerup', e => endPress(e, false));
+grid.addEventListener('pointercancel', e => endPress(e, true));
+grid.addEventListener('pointerleave', e => { if (press && e.pointerId === press.pid && e.pointerType === 'mouse') { press.el.classList.remove('down'); press = null; } });
+grid.addEventListener('click', e => {
+  if (e.target.closest('#addTile')) { pickFiles(); return; }
+  const pad = e.target.closest('.pad'); if (!pad) return;
+  if (state.edit) { openEditor(pad.dataset.id); return; }
+  if (e.detail === 0) { const s = state.byId.get(pad.dataset.id); if (s) { unlock(); trigger(s); } }
+});
+grid.addEventListener('contextmenu', e => { if (e.target.closest('.pad')) e.preventDefault(); });
+
+$('#now').addEventListener('click', e => { const b = e.target.closest('[data-stop]'); if (b) stopSound(b.dataset.stop); });
+$('#stopAll').addEventListener('click', stopAll);
+$('#chips').addEventListener('click', e => { if (e.target.closest('#soundChip')) unlock(); if (e.target.closest('[data-act="settings"]')) openPop(); });
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act;
+  if (a === 'add') pickFiles(); else if (a === 'starters') addStarters(); else if (a === 'sync') syncNow(true);
+  else if (a === 'hideInstall') { LS.set('hideInstall', true); renderBanner(); }
+});
+$('#tabs').addEventListener('click', e => { const t = e.target.closest('.tab'); if (!t) return; state.group = t.dataset.g; LS.set('group', state.group); renderTabs(); renderGrid(); });
+$('#btnEdit').addEventListener('click', () => { state.edit = !state.edit; renderEditBtn(); renderTabs(); renderGrid(); });
+$('#btnAdd').addEventListener('click', pickFiles);
+$('#btnSync').addEventListener('click', () => syncNow(true));
+
+/* rename group */
+$('#renameBox').addEventListener('click', e => {
+  if (e.target.closest('#renameBtn')) {
+    $('#renameBox').innerHTML = `<form class="rename" id="renameForm"><input id="renameIn" maxlength="30" value="${esc(state.group)}" aria-label="New group name"><button class="btn sm primary">Rename</button><button type="button" class="btn sm ghost" id="renameX">Cancel</button></form>`;
+    const i = $('#renameIn'); i.focus(); i.select();
+  } else if (e.target.closest('#renameX')) { $('#renameBox').innerHTML = ''; renderTabs(); }
+});
+$('#renameBox').addEventListener('submit', e => {
+  e.preventDefault();
+  const from = state.group, to = $('#renameIn').value.trim().slice(0, 30);
+  $('#renameBox').innerHTML = '';
+  if (!to || to === from) { renderTabs(); return; }
+  state.group = to; LS.set('group', to);
+  enqueue({ type: 'regroup', from, to });
+});
+
+/* ---------- adding sounds ---------- */
+function pickFiles() { if (!canEdit()) return; const f = $('#file'); f.value = ''; f.click(); }
+$('#file').addEventListener('change', e => { const files = Array.from(e.target.files || []); if (files.length) addFiles(files); });
+document.addEventListener('dragover', e => { if (e.dataTransfer && Array.from(e.dataTransfer.types || []).indexOf('Files') >= 0) e.preventDefault(); });
+document.addEventListener('drop', e => { if (!e.dataTransfer || !e.dataTransfer.files.length) return; e.preventDefault(); if (canEdit()) addFiles(Array.from(e.dataTransfer.files)); });
+let adding = false;
+async function addFiles(files) {
+  if (adding) { toast('Still preparing the last batch. Try again in a moment.'); return; }
+  adding = true;
+  const problems = [], pads = [], upl = [];
+  const group = state.group !== 'All' ? state.group : 'General';
+  let order = maxOrder();
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i];
+    toast(`Preparing ${i + 1} of ${files.length} · ${f.name}`, 0);
+    try {
+      if (f.size > MAX_FILE) throw new Error('bigger than 25 MB. Use a shorter or more compressed version.');
+      const ab = await f.arrayBuffer(), bytes = new Uint8Array(ab);
+      let buf;
+      try { buf = await decode(ab.slice(0)); } catch (err) { throw new Error('this device can\'t read that format. MP3, M4A, WAV, AIFF and FLAC work best.'); }
+      if (buf.duration > 600) throw new Error('longer than 10 minutes. Trim it first.');
+      const path = `sounds/${uid().slice(0, 12)}.${extFor(f.name, f.type)}`;
+      try { await IDB.put('audio', path, ab.slice(0)); } catch (e) {}
+      buffers.set('f:' + path, buf); failed.delete('f:' + path);
+      order += 1;
+      pads.push(cleanPad({ id: uid(), name: prettyName(f.name), group, color: (state.sounds.length + i) % COLOR_N, file: path, original: f.name.slice(0, 120), size: f.size, start: 0, end: null, fadeIn: 0, fadeOut: 0, volume: 1, loop: false, retap: 'restart', order, addedBy: GH.login || null }));
+      upl.push({ path, b64: bytesToB64(bytes) });
+    } catch (err) { problems.push(`${f.name}: ${(err && err.message) || err}`); }
+  }
+  adding = false;
+  if (pads.length) enqueue({ type: 'add', pads, files: upl });
+  if (problems.length) toast((pads.length ? `Added ${pads.length}. ` : '') + `Couldn't add ${problems.length}: ` + problems.join(' · '), 9000);
+  else toast(pads.length === 1 ? 'Added. Saving to the shared board…' : `Added ${pads.length} sounds. Saving to the shared board…`);
+}
+function addStarters() {
+  if (!canEdit()) return;
+  const base = maxOrder(), now = new Date().toISOString();
+  enqueue({ type: 'add', pads: STARTERS.map((s, i) => cleanPad(Object.assign({ id: uid(), file: null, start: 0, end: null, order: base + i + 1, added: now, addedBy: GH.login || null }, s))) });
+  toast('Added the starter sounds.');
+}
+
+/* ---------- settings ---------- */
+const pop = $('#pop');
+function openPop() {
+  pop.hidden = false; $('#btnSettings').setAttribute('aria-expanded', 'true');
+  $$('#sizeSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.size === state.size ? 'true' : 'false'));
+  $('#optInstant').checked = state.instant;
+  $('#wakeRow').hidden = !('wakeLock' in navigator); $('#optWake').checked = state.wake;
+  $('#muteRow').hidden = !navigator.audioSession; $('#optMute').checked = state.ignoreMute;
+  const fsOK = !standalone && (document.fullscreenEnabled || document.webkitFullscreenEnabled);
+  $('#fsBtn').hidden = !fsOK;
+  $('#fsBtn').textContent = (document.fullscreenElement || document.webkitFullscreenElement) ? 'Exit full screen' : 'Full screen';
+  renderPopInfo();
+}
+function closePop() { pop.hidden = true; $('#btnSettings').setAttribute('aria-expanded', 'false'); }
+async function renderPopInfo() {
+  const n = state.sounds.length, p = writer.pending.length;
+  $('#syncInfo').innerHTML = `<b>${n} pad${n === 1 ? '' : 's'}</b> on the board at <b>${esc(REPO)}</b>. Last synced ${esc(ago(sync.at))}.`
+    + (sync.offline ? ' You\'re offline, so this device is playing its saved copy.' : '')
+    + (sync.error ? ' ' + esc(sync.error) : '')
+    + (p ? ` <b>${p} change${p > 1 ? 's' : ''} waiting to save.</b>` : '');
+  $('#discardBtn').hidden = !p || writer.busy;
+  const tok = !!GH.token;
+  $('#ghForm').hidden = tok && !GH.bad;
+  $('#ghOut').hidden = !tok;
+  $('#ghInfo').innerHTML = !tok ? `This device can play the board. To add or edit sounds, connect a GitHub key from an account that's a collaborator on ${esc(REPO)}.`
+    : GH.bad ? `The key for <b>${esc(GH.login)}</b> stopped working. Paste a new one below.`
+    : GH.canEdit ? `Connected as <b>${esc(GH.login)}</b>. Changes you make save to the shared board for everyone.`
+    : `Connected as <b>${esc(GH.login)}</b>, but that account can't edit ${esc(REPO)}. Ask ${esc(CONFIG.owner)} to add you as a collaborator, accept the invite on GitHub, then disconnect and connect again.`;
+  $('#ghHelp').hidden = tok && !GH.bad && GH.canEdit;
+  $('#ghHelp').innerHTML = `<a href="${KEY_URL}" target="_blank" rel="noopener">Create a key on GitHub</a>. Leave the <b>public_repo</b> box ticked, pick an expiry, then copy the key and paste it here. It stays on this device only.`;
+  $('#starterBtn').hidden = !canEdit() || state.sounds.some(s => s.builtin);
+  let si = '';
+  try { if (navigator.storage && navigator.storage.estimate) { const est = await navigator.storage.estimate(); if (est && isFinite(est.usage)) si = `Sounds saved on this device for offline play: ${fmtBytes(est.usage)}.`; } } catch (e) {}
+  $('#storeInfo').textContent = si;
+}
+$('#btnSettings').addEventListener('click', e => { e.stopPropagation(); pop.hidden ? openPop() : closePop(); });
+document.addEventListener('pointerdown', e => { if (!pop.hidden && !pop.contains(e.target) && !e.target.closest('#btnSettings') && !e.target.closest('[data-act="settings"]')) closePop(); });
+$('#sizeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.size = b.dataset.size; LS.set('size', state.size); $$('#sizeSeg button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); renderGrid(); });
+$('#optInstant').addEventListener('change', e => { state.instant = e.target.checked; LS.set('instant', state.instant); });
+$('#syncBtn2').addEventListener('click', () => syncNow(true));
+let discardArm = 0;
+$('#discardBtn').addEventListener('click', () => {
+  const b = $('#discardBtn');
+  if (!discardArm) { b.textContent = 'Tap again to discard'; discardArm = setTimeout(() => { discardArm = 0; b.textContent = 'Discard unsaved changes'; }, 3500); return; }
+  clearTimeout(discardArm); discardArm = 0; b.textContent = 'Discard unsaved changes';
+  writer.pending = []; savePending(); recompute(); renderPopInfo(); toast('Unsaved changes discarded.');
+});
+$('#ghForm').addEventListener('submit', e => { e.preventDefault(); connectKey($('#ghToken').value); });
+$('#ghOut').addEventListener('click', disconnectKey);
+let wakeLock = null;
+async function applyWake() {
+  if (!('wakeLock' in navigator)) return;
+  if (state.wake && document.visibilityState === 'visible' && !wakeLock) {
+    try { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); }
+    catch (e) { wakeLock = null; if (state.wake) { state.wake = false; LS.set('wake', false); $('#optWake').checked = false; toast('This browser won\'t keep the screen on. Set Auto-Lock to Never in iPad Settings for long sessions.', 6000); } }
+  } else if (!state.wake && wakeLock) { try { await wakeLock.release(); } catch (e) {} wakeLock = null; }
+}
+$('#optWake').addEventListener('change', e => { state.wake = e.target.checked; LS.set('wake', state.wake); applyWake(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  applyWake(); renderChips();
+  if (Date.now() - sync.at > 30000) syncNow(false);
+});
+function applyMute() { if (!navigator.audioSession) return; try { navigator.audioSession.type = state.ignoreMute ? 'playback' : 'auto'; } catch (e) {} }
+$('#optMute').addEventListener('change', e => { state.ignoreMute = e.target.checked; LS.set('ignoreMute', state.ignoreMute); applyMute(); });
+$('#fsBtn').addEventListener('click', async () => {
+  const d = document, el = d.documentElement;
+  try {
+    if (d.fullscreenElement || d.webkitFullscreenElement) { await (d.exitFullscreen ? d.exitFullscreen() : d.webkitExitFullscreen()); }
+    else { await (el.requestFullscreen ? el.requestFullscreen() : el.webkitRequestFullscreen()); }
+  } catch (e) { toast('Full screen isn\'t available here.'); }
+  closePop();
+});
+$('#starterBtn').addEventListener('click', () => { closePop(); addStarters(); });
+const masterIn = $('#master');
+masterIn.value = Math.round(state.master * 100);
+masterIn.addEventListener('input', () => {
+  state.master = masterIn.value / 100; LS.set('master', state.master);
+  if (master) master.gain.setTargetAtTime(state.master * state.master, ctx.currentTime, 0.02);
+});
+
+/* ---------- editor ---------- */
+const ed = { open: false, preview: null };
+const wave = $('#wave'), ov = $('#overview');
+let TOK = {};
+function readTokens() { TOK = { ink: CSSV('--ink') || '#ece4d4', ground: CSSV('--ground') || '#0d1417', bronze: CSSV('--bronze') || '#cf9455', line: CSSV('--line') || '#29393f' }; for (let i = 0; i < COLOR_N; i++) TOK['p' + i] = CSSV('--p' + i); }
+$('#edColors').innerHTML = Array.from({ length: COLOR_N }, (_, i) => `<label class="sw c${i}"><input type="radio" name="edColor" value="${i}" aria-label="Colour ${i + 1}"></label>`).join('');
+
+function openEditor(id) {
+  const s = state.byId.get(id); if (!s) return;
+  closePop();
+  const k = padKey(s), buf = buffers.get(k) || null;
+  const draft = JSON.parse(JSON.stringify(s));
+  if (buf) { draft.start = clamp(+draft.start || 0, 0, buf.duration); draft.end = clamp(draft.end == null ? buf.duration : +draft.end, draft.start, buf.duration); }
+  Object.assign(ed, { open: true, id, draft, buf, key: k, peaks: buf ? peaksFor(k, buf) : null, ch0: buf ? buf.getChannelData(0) : null, ch1: buf && buf.numberOfChannels > 1 ? buf.getChannelData(1) : null, cursor: null, drag: null, pinch: null, preview: null, finder: false, regions: [], layerKey: '', ovKey: '' });
+  if (buf) {
+    const len = draft.end - draft.start;
+    ed.view = len < buf.duration * 0.5 ? [draft.start - len * 0.1, draft.end + len * 0.1] : [0, buf.duration];
+    normView();
+  } else ed.view = [0, 1];
+  $('#edTitle').textContent = 'Edit · ' + s.name;
+  $('#edName').value = draft.name || ''; $('#edGroup').value = draft.group || '';
+  const ci = $(`#edColors input[value="${(draft.color | 0) % COLOR_N}"]`); if (ci) ci.checked = true;
+  $('#edVol').value = Math.round((draft.volume == null ? 1 : draft.volume) * 100);
+  $('#edFi').value = draft.fadeIn | 0; $('#edFo').value = draft.fadeOut | 0;
+  $('#edLoop').checked = !!draft.loop;
+  const rt = $(`#edRetap input[value="${draft.retap || (draft.loop ? 'stop' : 'restart')}"]`); if (rt) rt.checked = true;
+  $('#finder').hidden = true; $('#edFind').setAttribute('aria-expanded', 'false');
+  disarmDelete();
+  const msg = $('#waveMsg'), err = failed.get(k);
+  msg.hidden = !!buf;
+  msg.textContent = buf ? '' : (err ? 'This sound isn\'t available: ' + err.message + '. You can still rename or delete it.' : 'Still downloading this sound. Close and reopen in a moment to trim it.');
+  $$('#edWaveSec .tools button, #edWaveSec .trims button, #edWaveSec .trims input, #edWaveSec .splits button').forEach(b => { b.disabled = !buf; });
+  $('#srcNote').textContent = s.builtin ? 'Starter sound, generated by the app itself. Trimming and splitting work the same as for your own files.'
+    : `Original file: ${s.original || s.file}${s.size ? ' · ' + fmtBytes(s.size) : ''}${buf ? ' · ' + fmt(buf.duration) : ''}${s.addedBy ? ' · added by ' + s.addedBy : ''}. Trims, fades and splits only change how it plays; the file itself stays as it was.`;
+  syncLabels(); syncTrim(); updatePlayBtn();
+  $('#sheet').hidden = false; document.body.classList.add('locked');
+  readTokens();
+  requestAnimationFrame(() => { sizeCanvases(); drawWave(); });
+}
+function closeEditor(silent) {
+  if (ed.preview) stopVoice(ed.preview, 0.03);
+  ed.open = false; ed.preview = null;
+  $('#sheet').hidden = true; document.body.classList.remove('locked');
+  if (silent === true) toast('That sound was removed from the board.');
+}
+function syncLabels() {
+  const d = ed.draft;
+  $('#volOut').textContent = Math.round((d.volume == null ? 1 : d.volume) * 100) + '%';
+  $('#fiOut').textContent = ((d.fadeIn | 0) / 1000).toFixed(2) + ' s';
+  $('#foOut').textContent = ((d.fadeOut | 0) / 1000).toFixed(2) + ' s';
+  $('#thrOut').textContent = $('#thr').value.replace('-', '−') + ' dB';
+  $('#gapOut').textContent = (+$('#gap').value).toFixed(2) + ' s';
+}
+function syncTrim() {
+  const d = ed.draft;
+  if (!ed.buf) { $('#edStart').value = ''; $('#edEnd').value = ''; $('#edLen').textContent = '—'; $('#edCur').textContent = '—'; return; }
+  if (document.activeElement !== $('#edStart')) $('#edStart').value = d.start.toFixed(3);
+  if (document.activeElement !== $('#edEnd')) $('#edEnd').value = d.end.toFixed(3);
+  $('#edStart').max = ed.buf.duration.toFixed(3); $('#edEnd').max = ed.buf.duration.toFixed(3);
+  $('#edLen').textContent = fmt(d.end - d.start);
+  $('#edCur').textContent = ed.cursor == null ? '—' : fmt(ed.cursor);
+}
+function updatePlayBtn() { $('#edPlayLab').textContent = ed.preview ? 'Stop' : 'Play clip'; }
+
+/* canvases */
+function sizeCanvases() {
+  const dpr = Math.min(3, window.devicePixelRatio || 1); ed.dpr = dpr;
+  for (const cv of [wave, ov]) { const r = cv.getBoundingClientRect(); cv.width = Math.max(1, Math.round(r.width * dpr)); cv.height = Math.max(1, Math.round(r.height * dpr)); }
+  ed.layerKey = ''; ed.ovKey = '';
+}
+function normView() {
+  const dur = ed.buf.duration; let [a, b] = ed.view;
+  const span = clamp(b - a, Math.min(0.02, dur), dur);
+  a = clamp(a, 0, dur - span); ed.view = [a, a + span];
+}
+function setView(a, b) { ed.view = [a, b]; normView(); drawWave(); }
+function drawPeaks(g, W, H, v0, v1, color) {
+  const buf = ed.buf, sr = buf.sampleRate, P = ed.peaks, mid = H / 2, amp = H * 0.44 / Math.max(0.05, P.peak);
+  const span = v1 - v0, spp = span * sr / W, d0 = ed.ch0, d1 = ed.ch1;
+  g.fillStyle = color;
+  for (let x = 0; x < W; x++) {
+    const s0 = Math.floor((v0 + span * x / W) * sr), s1 = Math.max(s0 + 1, Math.floor((v0 + span * (x + 1) / W) * sr));
+    let lo = 1, hi = -1;
+    if (spp >= P.bin * 2) {
+      const b0 = Math.floor(s0 / P.bin), b1 = Math.min(P.mn.length, Math.ceil(s1 / P.bin));
+      for (let b = b0; b < b1; b++) { if (P.mn[b] < lo) lo = P.mn[b]; if (P.mx[b] > hi) hi = P.mx[b]; }
+    } else {
+      const e = Math.min(buf.length, s1);
+      for (let i = s0; i < e; i++) { const v = d1 ? (d0[i] + d1[i]) * 0.5 : d0[i]; if (v < lo) lo = v; if (v > hi) hi = v; }
+    }
+    if (hi < lo) continue;
+    g.fillRect(x, mid - hi * amp, 1, Math.max(1, (hi - lo) * amp));
+  }
+}
+function padColor() { return TOK['p' + (((ed.draft.color | 0) % COLOR_N + COLOR_N) % COLOR_N)] || TOK.bronze; }
+function ensureLayer() {
+  const key = ed.view[0] + ',' + ed.view[1] + '|' + wave.width + 'x' + wave.height + '|' + ed.draft.color;
+  if (ed.layerKey === key) return; ed.layerKey = key;
+  const L = ed.layer || (ed.layer = document.createElement('canvas'));
+  L.width = wave.width; L.height = wave.height;
+  const g = L.getContext('2d'); g.clearRect(0, 0, L.width, L.height);
+  drawPeaks(g, L.width, L.height, ed.view[0], ed.view[1], padColor());
+}
+function ensureOvLayer() {
+  const key = ov.width + 'x' + ov.height + '|' + ed.draft.color;
+  if (ed.ovKey === key) return; ed.ovKey = key;
+  const L = ed.ovLayer || (ed.ovLayer = document.createElement('canvas'));
+  L.width = ov.width; L.height = ov.height;
+  const g = L.getContext('2d'); g.clearRect(0, 0, L.width, L.height);
+  drawPeaks(g, L.width, L.height, 0, ed.buf.duration, padColor());
+}
+function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.lineTo(x + w - r, y); g.quadraticCurveTo(x + w, y, x + w, y + r); g.lineTo(x + w, y + h - r); g.quadraticCurveTo(x + w, y + h, x + w - r, y + h); g.lineTo(x + r, y + h); g.quadraticCurveTo(x, y + h, x, y + h - r); g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y); g.closePath(); }
+function drawWave() {
+  if (!ed.open || !ed.buf || !wave.width) return;
+  ensureLayer();
+  const g = wave.getContext('2d'), W = wave.width, H = wave.height, dpr = ed.dpr, [v0, v1] = ed.view;
+  const X = t => (t - v0) / (v1 - v0) * W;
+  g.clearRect(0, 0, W, H);
+  g.globalAlpha = 0.12; g.fillStyle = TOK.ink; g.fillRect(0, Math.floor(H / 2), W, Math.max(1, dpr)); g.globalAlpha = 1;
+  g.drawImage(ed.layer, 0, 0);
+  if (ed.finder && ed.regions.length) {
+    g.font = `600 ${12 * dpr}px ${FONT}`; g.textBaseline = 'top';
+    ed.regions.forEach(([a, b], i) => {
+      const xa = X(a), xb = X(b); if (xb < 0 || xa > W) return;
+      g.globalAlpha = i % 2 ? 0.16 : 0.28; g.fillStyle = TOK.bronze; g.fillRect(xa, 0, xb - xa, H);
+      g.globalAlpha = 1; g.fillStyle = TOK.ink; g.fillText(String(i + 1), xa + 4 * dpr, 22 * dpr);
+    });
+  }
+  const xs = X(ed.draft.start), xe = X(ed.draft.end);
+  g.globalAlpha = 0.68; g.fillStyle = TOK.ground;
+  if (xs > 0) g.fillRect(0, 0, Math.min(W, xs), H);
+  if (xe < W) g.fillRect(Math.max(0, xe), 0, W - Math.max(0, xe), H);
+  g.globalAlpha = 1;
+  drawRuler(g, W, H, v0, v1, dpr);
+  drawHandle(g, xs, H, dpr, 'start'); drawHandle(g, xe, H, dpr, 'end');
+  if (ed.cursor != null) {
+    const xc = X(ed.cursor);
+    if (xc >= 0 && xc <= W) { g.strokeStyle = TOK.ink; g.lineWidth = 1.5 * dpr; g.setLineDash([4 * dpr, 4 * dpr]); g.beginPath(); g.moveTo(xc, 0); g.lineTo(xc, H); g.stroke(); g.setLineDash([]); }
+  }
+  if (ed.preview && voices.has(ed.preview)) { const xp = X(voicePos(ed.preview)); g.fillStyle = TOK.bronze; g.fillRect(xp - dpr, 0, 2 * dpr, H); }
+  drawOverview();
+}
+function drawRuler(g, W, H, v0, v1, dpr) {
+  const span = v1 - v0, pps = W / span;
+  const steps = [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300];
+  const step = steps.find(s => s * pps >= 84 * dpr) || 600;
+  const dec = step < 0.01 ? 3 : step < 0.1 ? 2 : step < 1 ? 1 : 0;
+  g.fillStyle = TOK.ink; g.globalAlpha = 0.5; g.font = `500 ${11 * dpr}px ${FONT}`; g.textBaseline = 'top';
+  for (let k = Math.ceil(v0 / step); k * step <= v1; k++) {
+    const t = k * step, x = (t - v0) * pps;
+    g.fillRect(x, 0, Math.max(1, dpr), 6 * dpr);
+    const lab = t >= 60 ? Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0') + (dec ? (t % 1).toFixed(dec).slice(1) : '') : t.toFixed(dec) + 's';
+    g.fillText(lab, x + 3 * dpr, 3 * dpr);
+  }
+  g.globalAlpha = 1;
+}
+function drawHandle(g, x, H, dpr, which) {
+  g.fillStyle = TOK.ink; g.fillRect(x - dpr, 0, 2 * dpr, H);
+  const w = 20 * dpr, h = 38 * dpr, y = which === 'start' ? H - h : 0, kx = which === 'start' ? x : x - w;
+  rr(g, kx, y, w, h, 5 * dpr); g.fill();
+  g.fillStyle = TOK.ground;
+  for (let i = 0; i < 3; i++) g.fillRect(kx + 5.5 * dpr + i * 3.5 * dpr, y + 11 * dpr, 1.5 * dpr, h - 22 * dpr);
+}
+function drawOverview() {
+  if (!ov.width) return;
+  ensureOvLayer();
+  const g = ov.getContext('2d'), W = ov.width, H = ov.height, dur = ed.buf.duration, dpr = ed.dpr;
+  const X = t => t / dur * W;
+  g.clearRect(0, 0, W, H); g.drawImage(ed.ovLayer, 0, 0);
+  g.globalAlpha = 0.6; g.fillStyle = TOK.ground;
+  g.fillRect(0, 0, X(ed.draft.start), H); g.fillRect(X(ed.draft.end), 0, W - X(ed.draft.end), H);
+  g.globalAlpha = 1;
+  const a = X(ed.view[0]), b = X(ed.view[1]);
+  if (b - a < W - 2) { g.strokeStyle = TOK.bronze; g.lineWidth = 2 * dpr; g.strokeRect(a + dpr, dpr, Math.max(4 * dpr, b - a - 2 * dpr), H - 2 * dpr); }
+}
+
+/* waveform gestures */
+const ptrs = new Map();
+function cssX(e, el) { return e.clientX - el.getBoundingClientRect().left; }
+function timeAtCss(x) { const w = wave.getBoundingClientRect().width || 1; return ed.view[0] + clamp(x, 0, w) / w * (ed.view[1] - ed.view[0]); }
+function xAtCss(t) { const w = wave.getBoundingClientRect().width || 1; return (t - ed.view[0]) / (ed.view[1] - ed.view[0]) * w; }
+wave.addEventListener('pointerdown', e => {
+  if (!ed.buf) return;
+  e.preventDefault();
+  try { wave.setPointerCapture(e.pointerId); } catch (err) {}
+  const x = cssX(e, wave), y = e.clientY - wave.getBoundingClientRect().top;
+  ptrs.set(e.pointerId, x);
+  if (ptrs.size === 2) {
+    const [p, q] = Array.from(ptrs.values());
+    ed.pinch = { d0: Math.max(10, Math.abs(p - q)), span0: ed.view[1] - ed.view[0], tc: timeAtCss((p + q) / 2) };
+    ed.drag = null; return;
+  }
+  if (ptrs.size > 2) return;
+  const ds = Math.abs(x - xAtCss(ed.draft.start)), de = Math.abs(x - xAtCss(ed.draft.end)), R = 26;
+  const h = wave.getBoundingClientRect().height;
+  let mode = null;
+  if (ds < R && de < R) mode = y > h / 2 ? 'start' : 'end';
+  else if (ds < R) mode = 'start'; else if (de < R) mode = 'end';
+  ed.drag = mode ? { mode, moved: false } : { mode: 'new', x0: x, t0: timeAtCss(x), moved: false };
+});
+wave.addEventListener('pointermove', e => {
+  if (!ptrs.has(e.pointerId)) return;
+  const x = cssX(e, wave); ptrs.set(e.pointerId, x);
+  if (ed.pinch && ptrs.size >= 2) {
+    const [p, q] = Array.from(ptrs.values()), d = Math.max(10, Math.abs(p - q));
+    const span = clamp(ed.pinch.span0 * ed.pinch.d0 / d, 0.02, ed.buf.duration);
+    const w = wave.getBoundingClientRect().width || 1, mid = (p + q) / 2;
+    setView(ed.pinch.tc - mid / w * span, ed.pinch.tc - mid / w * span + span);
+    return;
+  }
+  const dr = ed.drag; if (!dr) return;
+  const t = timeAtCss(x), d = ed.draft, dur = ed.buf.duration;
+  if (dr.mode === 'start') { d.start = clamp(t, 0, d.end - MIN_CLIP); dr.moved = true; }
+  else if (dr.mode === 'end') { d.end = clamp(t, d.start + MIN_CLIP, dur); dr.moved = true; }
+  else {
+    if (!dr.moved && Math.abs(x - dr.x0) < 6) return;
+    dr.moved = true;
+    let a = Math.min(dr.t0, t), b = Math.max(dr.t0, t);
+    if (b - a < MIN_CLIP) b = Math.min(dur, a + MIN_CLIP);
+    d.start = a; d.end = b;
+  }
+  syncTrim(); drawWave();
+});
+function waveUp(e) {
+  if (!ptrs.has(e.pointerId)) return;
+  ptrs.delete(e.pointerId);
+  if (ed.pinch) { if (ptrs.size < 2) ed.pinch = null; ed.drag = null; return; }
+  const dr = ed.drag; ed.drag = null;
+  if (!dr) return;
+  if (dr.mode === 'new' && !dr.moved) ed.cursor = dr.t0;
+  if (dr.moved && ed.finder) runFinderSoon();
+  syncTrim(); drawWave();
+}
+wave.addEventListener('pointerup', waveUp);
+wave.addEventListener('pointercancel', waveUp);
+let ovDrag = false;
+function ovMove(e) { const w = ov.getBoundingClientRect().width || 1, t = clamp(cssX(e, ov) / w, 0, 1) * ed.buf.duration, span = ed.view[1] - ed.view[0]; setView(t - span / 2, t + span / 2); }
+ov.addEventListener('pointerdown', e => { if (!ed.buf) return; e.preventDefault(); ovDrag = true; try { ov.setPointerCapture(e.pointerId); } catch (err) {} ovMove(e); });
+ov.addEventListener('pointermove', e => { if (ovDrag) ovMove(e); });
+ov.addEventListener('pointerup', () => { ovDrag = false; });
+ov.addEventListener('pointercancel', () => { ovDrag = false; });
+window.addEventListener('resize', () => { if (ed.open && ed.buf) { sizeCanvases(); drawWave(); } });
+
+/* zoom + preview */
+function zoom(f) {
+  const [a, b] = ed.view, span = b - a, ns = span * f;
+  let c = (a + b) / 2;
+  if (ed.cursor != null && ed.cursor >= a && ed.cursor <= b) c = ed.cursor;
+  else if (f < 1) c = clamp((ed.draft.start + ed.draft.end) / 2, a, b);
+  const frac = (c - a) / span;
+  setView(c - frac * ns, c - frac * ns + ns);
+}
+$('#zIn').addEventListener('click', () => zoom(0.5));
+$('#zOut').addEventListener('click', () => zoom(2));
+$('#zFit').addEventListener('click', () => { const d = ed.draft, len = d.end - d.start; setView(d.start - len * 0.08, d.end + len * 0.08); });
+$('#zAll').addEventListener('click', () => setView(0, ed.buf.duration));
+function startPreview(from) {
+  unlock();
+  if (ed.preview) stopVoice(ed.preview, 0.02);
+  const snd = Object.assign({}, ed.draft, { id: '__preview' });
+  const go = () => { ed.preview = play(snd, { buf: ed.buf, from, preview: true }); updatePlayBtn(); };
+  const c = getCtx();
+  if (c.state === 'running') go(); else { const r = c.resume(); if (r && r.then) r.then(go, () => {}); }
+}
+$('#edPlay').addEventListener('click', () => { if (ed.preview) { stopVoice(ed.preview, 0.03); ed.preview = null; updatePlayBtn(); drawWave(); } else startPreview(null); });
+$('#edPlayCur').addEventListener('click', () => {
+  const c = ed.cursor;
+  if (c == null || c < ed.draft.start || c >= ed.draft.end) { toast('Tap the waveform inside the clip to place the cursor first.'); return; }
+  startPreview(c);
+});
+
+/* trim inputs */
+function trimInput(which) {
+  const el = which === 'start' ? $('#edStart') : $('#edEnd'), v = parseFloat(el.value), d = ed.draft, dur = ed.buf.duration;
+  if (!isFinite(v)) { syncTrim(); return; }
+  if (which === 'start') d.start = clamp(v, 0, d.end - MIN_CLIP); else d.end = clamp(v, d.start + MIN_CLIP, dur);
+  if (ed.finder) runFinderSoon();
+  drawWave(); $('#edLen').textContent = fmt(d.end - d.start);
+}
+$('#edStart').addEventListener('change', () => { trimInput('start'); syncTrim(); });
+$('#edEnd').addEventListener('change', () => { trimInput('end'); syncTrim(); });
+$('#edStart').addEventListener('input', () => trimInput('start'));
+$('#edEnd').addEventListener('input', () => trimInput('end'));
+$('#setStart').addEventListener('click', () => {
+  if (ed.cursor == null) { toast('Tap the waveform to place the cursor first.'); return; }
+  if (ed.cursor >= ed.draft.end - MIN_CLIP) { toast('The cursor is after the end of the clip.'); return; }
+  ed.draft.start = ed.cursor; syncTrim(); drawWave(); if (ed.finder) runFinderSoon();
+});
+$('#setEnd').addEventListener('click', () => {
+  if (ed.cursor == null) { toast('Tap the waveform to place the cursor first.'); return; }
+  if (ed.cursor <= ed.draft.start + MIN_CLIP) { toast('The cursor is before the start of the clip.'); return; }
+  ed.draft.end = ed.cursor; syncTrim(); drawWave(); if (ed.finder) runFinderSoon();
+});
+
+/* other fields */
+$('#edName').addEventListener('input', e => { ed.draft.name = e.target.value; });
+$('#edGroup').addEventListener('input', e => { ed.draft.group = e.target.value; });
+$('#edColors').addEventListener('change', e => { ed.draft.color = +e.target.value; ed.layerKey = ''; ed.ovKey = ''; drawWave(); });
+$('#edVol').addEventListener('input', e => { ed.draft.volume = e.target.value / 100; syncLabels(); });
+$('#edFi').addEventListener('input', e => { ed.draft.fadeIn = +e.target.value; syncLabels(); });
+$('#edFo').addEventListener('input', e => { ed.draft.fadeOut = +e.target.value; syncLabels(); });
+$('#edLoop').addEventListener('change', e => {
+  ed.draft.loop = e.target.checked;
+  const want = ed.draft.loop ? 'stop' : 'restart';
+  if (ed.draft.retap !== 'layer') { ed.draft.retap = want; const r = $(`#edRetap input[value="${want}"]`); if (r) r.checked = true; }
+});
+$('#edRetap').addEventListener('change', e => { ed.draft.retap = e.target.value; });
+
+/* save / cancel */
+const updateOp = () => ({ type: 'update', id: ed.id, name: ed.draft.name, fields: fieldsOf(ed.draft) });
+$('#edSave').addEventListener('click', () => { enqueue(updateOp()); closeEditor(); });
+$('#edCancel').addEventListener('click', () => closeEditor());
+$('#sheet').addEventListener('click', e => { if (e.target === $('#sheet')) closeEditor(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (ed.open) closeEditor(); else if (!pop.hidden) closePop();
+});
+
+/* split at cursor */
+$('#edSplit').addEventListener('click', () => {
+  const c = ed.cursor, d = ed.draft;
+  if (c == null || c <= d.start + 0.02 || c >= d.end - 0.02) { toast('Tap the waveform inside the clip to choose where to split.'); return; }
+  const b = cleanPad(Object.assign({}, d, { id: uid(), name: (d.name || 'Sound').slice(0, 56) + ' 2', start: c, end: d.end, order: orderAfter(ed.id)[0], added: new Date().toISOString(), addedBy: GH.login || d.addedBy || null }));
+  d.end = c;
+  enqueue([updateOp(), { type: 'add', pads: [b] }]);
+  toast(`Split into “${d.name}” and “${b.name}”.`);
+  ed.cursor = null; syncTrim(); drawWave();
+});
+
+/* find separate sounds */
+function detectRegions(buf, a, b, thrDb, gap) {
+  const sr = buf.sampleRate, chs = []; for (let i = 0; i < Math.min(2, buf.numberOfChannels); i++) chs.push(buf.getChannelData(i));
+  const win = Math.max(1, Math.round(sr * 0.01)), wsec = win / sr;
+  const s0 = Math.floor(a * sr), s1 = Math.min(buf.length, Math.floor(b * sr)), n = Math.ceil((s1 - s0) / win);
+  if (n <= 0) return [];
+  const env = new Float32Array(n); let peak = 0;
+  for (let w = 0; w < n; w++) {
+    let m = 0; const st = s0 + w * win, e = Math.min(s1, st + win);
+    for (const c of chs) for (let i = st; i < e; i++) { const v = c[i] < 0 ? -c[i] : c[i]; if (v > m) m = v; }
+    env[w] = m; if (m > peak) peak = m;
+  }
+  if (!peak) return [];
+  const thr = peak * Math.pow(10, thrDb / 20), gapW = Math.max(1, Math.round(gap / wsec)), runs = [];
+  let cur = null, quiet = 0;
+  for (let w = 0; w < n; w++) {
+    if (env[w] >= thr) { if (!cur) cur = [w, w]; else cur[1] = w; quiet = 0; }
+    else if (cur) { quiet++; if (quiet >= gapW) { runs.push(cur); cur = null; quiet = 0; } }
+  }
+  if (cur) runs.push(cur);
+  const out = [];
+  for (const [w0, w1] of runs) {
+    const st = Math.max(a, a + w0 * wsec - 0.02), en = Math.min(b, a + (w1 + 1) * wsec + 0.08);
+    if (en - st >= 0.06) out.push([st, en]);
+  }
+  for (let i = 1; i < out.length; i++) if (out[i][0] < out[i - 1][1]) { const m = (out[i][0] + out[i - 1][1]) / 2; out[i - 1][1] = m; out[i][0] = m; }
+  return out;
+}
+function runFinder() {
+  if (!ed.open || !ed.buf) return;
+  ed.regions = detectRegions(ed.buf, ed.draft.start, ed.draft.end, +$('#thr').value, +$('#gap').value);
+  const n = ed.regions.length, mk = $('#edMake');
+  $('#findCount').textContent = n >= 2 ? `Found ${n} separate sounds in this clip. Each becomes its own pad.` : n === 1 ? 'Found only one sound. Raise the silence level or shorten the gap to find more.' : 'Found nothing above the silence level. Lower it to find quieter sounds.';
+  mk.disabled = n < 2; mk.textContent = n >= 2 ? `Make ${n} pads` : 'Make pads';
+  drawWave();
+}
+let finderT = 0;
+function runFinderSoon() { clearTimeout(finderT); finderT = setTimeout(runFinder, 120); }
+$('#edFind').addEventListener('click', () => {
+  ed.finder = !ed.finder; $('#finder').hidden = !ed.finder; $('#edFind').setAttribute('aria-expanded', ed.finder ? 'true' : 'false');
+  if (ed.finder) runFinder(); else drawWave();
+});
+$('#thr').addEventListener('input', () => { syncLabels(); runFinderSoon(); });
+$('#gap').addEventListener('input', () => { syncLabels(); runFinderSoon(); });
+$('#edMake').addEventListener('click', () => {
+  const R = ed.regions.slice(); if (R.length < 2) return;
+  const base = cleanPad(ed.draft), orders = orderAfter(ed.id, R.length - 1), now = new Date().toISOString();
+  ed.draft.start = R[0][0]; ed.draft.end = R[0][1];
+  const extra = [];
+  for (let i = 1; i < R.length; i++) extra.push(cleanPad(Object.assign({}, base, { id: uid(), name: base.name.slice(0, 55) + ' ' + (i + 1), start: R[i][0], end: R[i][1], order: orders[i - 1], added: now, addedBy: GH.login || base.addedBy })));
+  enqueue([updateOp(), { type: 'add', pads: extra }]);
+  toast(`Made ${R.length} pads from “${base.name}”.`);
+  ed.finder = false; $('#finder').hidden = true; $('#edFind').setAttribute('aria-expanded', 'false'); ed.regions = [];
+  const len = ed.draft.end - ed.draft.start; ed.view = [ed.draft.start - len * 0.1, ed.draft.end + len * 0.1]; normView();
+  syncTrim(); drawWave();
+});
+
+/* duplicate / move / delete */
+$('#edDup').addEventListener('click', () => {
+  enqueue({ type: 'add', pads: [cleanPad(Object.assign({}, ed.draft, { id: uid(), name: (ed.draft.name || 'Sound').slice(0, 54) + ' copy', order: orderAfter(ed.id)[0], added: new Date().toISOString(), addedBy: GH.login || null }))] });
+  toast('Duplicated. The copy is right after this one.');
+});
+function move(dir) {
+  const list = visible(), i = list.findIndex(s => s.id === ed.id), j = i + dir;
+  if (i < 0 || j < 0 || j >= list.length) { toast(dir < 0 ? 'Already first in this group.' : 'Already last in this group.'); return; }
+  const other = list[j], a = +ed.draft.order || 0, b = +other.order || 0;
+  let na = b, nb = a; if (na === nb) na = b + dir * 0.5;
+  ed.draft.order = na;
+  enqueue({ type: 'order', changes: [[ed.id, na], [other.id, nb]] });
+  toast(dir < 0 ? 'Moved earlier.' : 'Moved later.');
+}
+$('#edEarlier').addEventListener('click', () => move(-1));
+$('#edLater').addEventListener('click', () => move(1));
+let delT = 0;
+function disarmDelete() { clearTimeout(delT); const b = $('#edDel'); b.classList.remove('armed'); b.textContent = 'Delete'; }
+$('#edDel').addEventListener('click', () => {
+  const b = $('#edDel');
+  if (!b.classList.contains('armed')) { b.classList.add('armed'); b.textContent = 'Tap again to delete'; clearTimeout(delT); delT = setTimeout(disarmDelete, 3500); return; }
+  disarmDelete();
+  const id = ed.id, s = state.byId.get(id); if (!s) { closeEditor(); return; }
+  stopSound(id, 0.05); closeEditor();
+  enqueue({ type: 'remove', ids: [id], name: s.name });
+  toast(`Deleted “${s.name}”.`);
+});
+
+/* ---------- start ---------- */
+async function init() {
+  applyMute();
+  renderAll();
+  try {
+    const [b, et, pend] = await Promise.all([IDB.get('meta', 'remote'), IDB.get('meta', 'etag'), IDB.get('meta', 'pending')]);
+    if (b && Array.isArray(b.pads)) sync.remote = b;
+    if (et) sync.etag = et;
+    if (Array.isArray(pend)) writer.pending = pend;
+  } catch (e) {}
+  sync.loaded = true;
+  recompute();
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+  await syncNow(false);
+  kickWriter();
+  setInterval(() => { if (document.visibilityState === 'visible') syncNow(false); }, GH.token ? 60000 : 300000);
+  window.addEventListener('online', () => { sync.offline = false; syncNow(false); if (writer.retryT) { clearTimeout(writer.retryT); writer.retryT = 0; } kickWriter(); });
+  window.addEventListener('offline', () => { sync.offline = true; renderChips(); });
+  if (state.wake) applyWake();
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost') && !window.ATO_CONFIG) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+}
+init();
+})();
+</script>
+</body>
+</html>
