@@ -2,26 +2,6 @@
   "format": 1,
   "pads": [
     {
-      "id": "starter-gong",
-      "name": "Temple gong",
-      "group": "Moments",
-      "color": 7,
-      "file": null,
-      "builtin": "gong",
-      "original": null,
-      "size": null,
-      "start": 0,
-      "end": null,
-      "fadeIn": 0,
-      "fadeOut": 500,
-      "volume": 0.9,
-      "loop": false,
-      "retap": "restart",
-      "order": 3,
-      "added": "2026-10-20T00:00:00.000Z",
-      "addedBy": "shacaska"
-    },
-    {
       "id": "starter-riser",
       "name": "Rising dread",
       "group": "Mood",
