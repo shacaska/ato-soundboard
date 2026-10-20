@@ -1,25 +1,4 @@
 {
   "format": 1,
-  "pads": [
-    {
-      "id": "starter-wind",
-      "name": "Sea wind",
-      "group": "Mood",
-      "color": 3,
-      "file": null,
-      "builtin": "wind",
-      "original": null,
-      "size": null,
-      "start": 0,
-      "end": null,
-      "fadeIn": 1500,
-      "fadeOut": 1500,
-      "volume": 0.8,
-      "loop": true,
-      "retap": "stop",
-      "order": 6,
-      "added": "2026-10-20T00:00:00.000Z",
-      "addedBy": "shacaska"
-    }
-  ]
+  "pads": []
 }
