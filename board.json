@@ -23,7 +23,7 @@
     },
     {
       "id": "1051dbbb52fe4025",
-      "name": "Wilhelm Scream – Sound Effect (HD)",
+      "name": "Priestly Sacrifice",
       "group": "General",
       "color": 1,
       "file": "sounds/cae181373379.mp3",
@@ -31,7 +31,7 @@
       "original": "Wilhelm Scream - Sound Effect (HD).mp3",
       "size": 16545,
       "start": 0,
-      "end": null,
+      "end": 1.3816,
       "fadeIn": 0,
       "fadeOut": 0,
       "volume": 1,
