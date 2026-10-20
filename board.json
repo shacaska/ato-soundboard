@@ -2,26 +2,6 @@
   "format": 1,
   "pads": [
     {
-      "id": "starter-strike",
-      "name": "Bronze strike",
-      "group": "Battle",
-      "color": 1,
-      "file": null,
-      "builtin": "strike",
-      "original": null,
-      "size": null,
-      "start": 0,
-      "end": null,
-      "fadeIn": 0,
-      "fadeOut": 0,
-      "volume": 1,
-      "loop": false,
-      "retap": "layer",
-      "order": 1,
-      "added": "2026-10-20T00:00:00.000Z",
-      "addedBy": "shacaska"
-    },
-    {
       "id": "starter-thunder",
       "name": "Thunder",
       "group": "Battle",
