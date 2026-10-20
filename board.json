@@ -20,6 +20,26 @@
       "order": 1,
       "added": "2026-10-20T00:41:58.688Z",
       "addedBy": "shacaska"
+    },
+    {
+      "id": "1051dbbb52fe4025",
+      "name": "Wilhelm Scream – Sound Effect (HD)",
+      "group": "General",
+      "color": 1,
+      "file": "sounds/cae181373379.mp3",
+      "builtin": null,
+      "original": "Wilhelm Scream - Sound Effect (HD).mp3",
+      "size": 16545,
+      "start": 0,
+      "end": null,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "volume": 1,
+      "loop": false,
+      "retap": "restart",
+      "order": 2,
+      "added": "2026-10-20T00:44:00.155Z",
+      "addedBy": "shacaska"
     }
   ]
 }
