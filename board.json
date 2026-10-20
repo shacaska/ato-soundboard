@@ -2,26 +2,6 @@
   "format": 1,
   "pads": [
     {
-      "id": "starter-riser",
-      "name": "Rising dread",
-      "group": "Mood",
-      "color": 6,
-      "file": null,
-      "builtin": "riser",
-      "original": null,
-      "size": null,
-      "start": 0,
-      "end": null,
-      "fadeIn": 0,
-      "fadeOut": 0,
-      "volume": 0.9,
-      "loop": false,
-      "retap": "restart",
-      "order": 4,
-      "added": "2026-10-20T00:00:00.000Z",
-      "addedBy": "shacaska"
-    },
-    {
       "id": "starter-wind",
       "name": "Sea wind",
       "group": "Mood",
