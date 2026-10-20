@@ -1,9 +1,9 @@
 // Keeps the app itself available offline. Sounds are stored by the app in IndexedDB, not here.
-const CACHE = 'ato-soundboard-v1';
+const CACHE = 'ato-soundboard-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
@@ -22,7 +22,7 @@ self.addEventListener('fetch', e => {
   const key = req.mode === 'navigate' ? './index.html' : req;
   e.respondWith(caches.open(CACHE).then(async cache => {
     const hit = await cache.match(key, { ignoreSearch: req.mode === 'navigate' });
-    const fresh = fetch(req).then(res => {
+    const fresh = fetch(same ? new Request(req.mode === 'navigate' ? './index.html' : req.url, { cache: 'no-cache' }) : req).then(res => {
       if (res && (res.ok || res.type === 'opaque')) cache.put(key, res.clone());
       return res;
     }).catch(() => null);

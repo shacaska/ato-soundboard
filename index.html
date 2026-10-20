@@ -187,6 +187,28 @@ main{padding-block:14px calc(104px + env(safe-area-inset-bottom,0px))}
 .ed-foot{display:flex;gap:8px;flex-wrap:wrap;padding-top:16px;border-top:1px solid var(--line)}
 .src-note{margin:0;color:var(--ink-3);font-size:14px;line-height:1.45;overflow-wrap:anywhere}
 
+/* small centred prompt (used when a video has to be played once to capture its sound) */
+.ask-wrap{position:fixed;inset:0;z-index:55;background:rgba(4,8,9,.74);display:flex;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.ask{width:min(460px,100%);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 18px 50px rgba(0,0,0,.55)}
+.ask h3{margin:0;font-family:var(--f-display);font-weight:400;font-size:21px}
+.ask .row{justify-content:flex-end}
+.bar{height:8px;border-radius:999px;background:var(--ground);border:1px solid var(--line);overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:var(--bronze)}
+
+/* recorder */
+.sheet.compact{align-items:center}
+.sheet.compact .sheet-panel{max-width:620px;max-height:100%}
+.rec-body{align-items:stretch}
+#recLevel{display:block;width:100%;height:120px;border-radius:8px;background:var(--ground);border:1px solid var(--line)}
+.rec-mid{display:flex;align-items:center;justify-content:center;gap:22px}
+.rec-time{font-size:34px;font-weight:600;font-variant-numeric:tabular-nums;min-width:5.5ch;text-align:center}
+.rec-btn{width:84px;height:84px;border-radius:50%;border:3px solid var(--ink);background:transparent;display:flex;align-items:center;justify-content:center;padding:0;touch-action:manipulation}
+.rec-btn span{width:60px;height:60px;border-radius:50%;background:var(--danger);transition:all .15s}
+.rec-btn.on span{width:30px;height:30px;border-radius:6px}
+.rec-after{display:flex;flex-direction:column;gap:12px;padding-top:14px;border-top:1px solid var(--line)}
+.rec-fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.2fr);gap:12px 14px}
+@media (max-width:520px){.rec-fields{grid-template-columns:1fr}}
+
 /* toast */
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;max-width:min(560px,calc(100vw - 32px));padding:12px 16px;border-radius:var(--r);background:var(--ink);color:var(--ground);font-size:16px;font-weight:500;line-height:1.35;box-shadow:0 10px 30px rgba(0,0,0,.5);pointer-events:none}
 
@@ -221,6 +243,7 @@ main{padding-block:14px calc(104px + env(safe-area-inset-bottom,0px))}
         <button class="btn icon" id="btnSync" aria-label="Sync with GitHub" title="Sync with GitHub"><svg class="i" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20v-4h-4"/></svg></button>
         <button class="btn icon" id="btnSettings" aria-label="Settings" aria-expanded="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h8M16 7h4M4 17h3M11 17h9"/><circle cx="14" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
         <button class="btn" id="btnEdit" aria-pressed="false" hidden><svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg><span class="lab" id="editLab">Edit</span></button>
+        <button class="btn" id="btnRec" hidden><svg class="i" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span class="lab">Record</span></button>
         <button class="btn primary keep" id="btnAdd" hidden><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span class="lab">Add sounds</span></button>
       </div>
     </div>
@@ -341,9 +364,45 @@ main{padding-block:14px calc(104px + env(safe-area-inset-bottom,0px))}
   </div>
 </div>
 
+<div class="sheet compact" id="recSheet" hidden role="dialog" aria-modal="true" aria-labelledby="recTitle">
+  <div class="sheet-panel">
+    <div class="sheet-head">
+      <h2 id="recTitle">Record a sound</h2>
+      <button class="btn ghost" id="recClose">Close</button>
+    </div>
+    <div class="sheet-body rec-body">
+      <canvas id="recLevel" aria-hidden="true"></canvas>
+      <div class="rec-mid">
+        <div class="rec-time" id="recTime">0:00.0</div>
+        <button class="rec-btn" id="recBtn" aria-label="Start recording"><span></span></button>
+      </div>
+      <p class="note" id="recMsg">Tap the red button to start recording with the microphone. Up to 2 minutes.</p>
+      <div class="rec-after" id="recAfter" hidden>
+        <div class="rec-fields">
+          <label class="fld"><span>Name</span><input type="text" id="recName" maxlength="60" autocomplete="off"></label>
+          <label class="fld"><span>Group</span><input type="text" id="recGroup" maxlength="30" list="groupList" autocomplete="off"></label>
+        </div>
+        <div class="row">
+          <button class="btn sm" id="recPlay"><svg class="i f" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg><span id="recPlayLab">Play it back</span></button>
+          <span class="sp"></span>
+          <button class="btn sm primary" id="recSave">Add to board</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ask-wrap" id="ask" hidden role="dialog" aria-modal="true" aria-labelledby="askTitle">
+  <div class="ask">
+    <h3 id="askTitle"></h3>
+    <p class="note" id="askMsg"></p>
+    <div class="bar" id="askBar" hidden><span id="askFill"></span></div>
+    <div class="row"><button class="btn sm ghost" id="askNo">Skip</button><button class="btn sm primary" id="askYes">Continue</button></div>
+  </div>
+</div>
+
 <datalist id="groupList"></datalist>
-<input type="file" id="file" multiple hidden accept="audio/*,.mp3,.m4a,.aac,.wav,.aif,.aiff,.caf,.flac,.ogg,.oga,.opus,.webm,.mp4">
-<div class="toast" id="toast" hidden role="status" aria-live="polite"></div>
+<input type="file" id="file" multiple hidden accept="audio/*,video/*,.mp3,.m4a,.aac,.wav,.aif,.aiff,.caf,.flac,.ogg,.oga,.opus,.webm,.mp4,.mov,.m4v,.3gp"><div class="toast" id="toast" hidden role="status" aria-live="polite"></div>
 
 <script>
 (() => {
@@ -421,6 +480,50 @@ function bytesToB64(u) {
   return btoa(s);
 }
 function utf8ToB64(str) { return bytesToB64(new TextEncoder().encode(str)); }
+
+/* ---------- WAV encoding (videos and recordings are stored as WAV) ---------- */
+function encodeWav(chs, rate) {
+  const nc = chs.length, n = chs[0].length, data = n * nc * 2, ab = new ArrayBuffer(44 + data), dv = new DataView(ab);
+  const str = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+  str(0, 'RIFF'); dv.setUint32(4, 36 + data, true); str(8, 'WAVE'); str(12, 'fmt ');
+  dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, nc, true); dv.setUint32(24, rate, true);
+  dv.setUint32(28, rate * nc * 2, true); dv.setUint16(32, nc * 2, true); dv.setUint16(34, 16, true);
+  str(36, 'data'); dv.setUint32(40, data, true);
+  let o = 44;
+  for (let i = 0; i < n; i++) for (let c = 0; c < nc; c++) { const v = Math.max(-1, Math.min(1, chs[c][i])); dv.setInt16(o, v < 0 ? v * 0x8000 : v * 0x7FFF, true); o += 2; }
+  return new Uint8Array(ab);
+}
+function renderOffline(oc) {
+  return new Promise((res, rej) => {
+    oc.oncomplete = e => res(e.renderedBuffer);
+    try { const p = oc.startRendering(); if (p && p.then) p.then(res, rej); } catch (e) { rej(e); }
+  });
+}
+async function bufferToWav(buf) {
+  let chs = [buf.getChannelData(0)], rate = buf.sampleRate;
+  if (buf.numberOfChannels > 1) {
+    const l = chs[0], r = buf.getChannelData(1); let diff = 0;
+    for (let i = 0; i < r.length; i += 7) { const d = Math.abs(r[i] - l[i]); if (d > diff) diff = d; }
+    if (diff > 0.002) chs.push(r);
+  }
+  const fits = (nc, len) => 44 + len * nc * 2 <= MAX_FILE;
+  if (!fits(chs.length, buf.length) && chs.length === 2) { const m = new Float32Array(buf.length), l = chs[0], r = chs[1]; for (let i = 0; i < m.length; i++) m[i] = (l[i] + r[i]) * 0.5; chs = [m]; }
+  if (!fits(1, buf.length)) {
+    const target = 24000, len = Math.ceil(buf.duration * target);
+    if (!fits(1, len)) throw new Error('too long to store. Keep clips under about 8 minutes.');
+    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext, oc = new OAC(1, len, target);
+    const b = oc.createBuffer(1, chs[0].length, rate); b.getChannelData(0).set(chs[0]);
+    const s = oc.createBufferSource(); s.buffer = b; s.connect(oc.destination); s.start(0);
+    chs = [(await renderOffline(oc)).getChannelData(0)]; rate = target;
+  }
+  return encodeWav(chs, rate);
+}
+function isVideoFile(f) {
+  const t = (f.type || '').toLowerCase();
+  if (t.startsWith('video/')) return true;
+  if (t.startsWith('audio/')) return false;
+  return /\.(mov|m4v|3gp|mkv)$/i.test(f.name);
+}
 function extFor(name, mime) {
   const e = (String(name).split('.').pop() || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   if (e && e.length <= 5 && e !== String(name).toLowerCase()) return e;
@@ -1011,7 +1114,7 @@ function renderGrid() {
   else if (!sync.remote && sync.offline) eb.innerHTML = `<div class="empty"><h2>Not downloaded yet</h2><p>Connect to the internet once so the board and its sounds can download. After that it works offline.</p></div>`;
   else if (!sync.remote && sync.error) eb.innerHTML = `<div class="empty"><h2>Couldn't load the board</h2><p>${esc(sync.error)}</p><div class="row"><button class="btn" data-act="sync">Try again</button></div></div>`;
   else eb.innerHTML = `<div class="empty"><h2>No sounds yet</h2>${canEdit()
-    ? `<p>Add MP3, M4A, WAV, AIFF or FLAC files from your Files app. After adding, open Edit to trim them or split one file into several pads.</p><div class="row"><button class="btn primary" data-act="add">Add sounds</button><button class="btn" data-act="starters">Add starter sounds</button></div>`
+    ? `<p>Add audio files (MP3, M4A, WAV, AIFF, FLAC) or videos from Files or Photos, or record one with the microphone. After adding, open Edit to trim them or split one file into several pads.</p><div class="row"><button class="btn primary" data-act="add">Add sounds</button><button class="btn" data-act="starters">Add starter sounds</button></div>`
     : `<p>Nothing on this board yet. To add sounds, connect a GitHub key in Settings.</p>`}</div>`;
 }
 function updatePlaying() {
@@ -1054,7 +1157,7 @@ function renderBanner() {
 }
 function renderEditBtn() {
   const b = $('#btnEdit'), can = canEdit();
-  b.hidden = !can; $('#btnAdd').hidden = !can;
+  b.hidden = !can; $('#btnAdd').hidden = !can; $('#btnRec').hidden = !can || !canRecord();
   if (!can) state.edit = false;
   b.classList.toggle('on', state.edit); b.setAttribute('aria-pressed', state.edit ? 'true' : 'false');
   $('#editLab').textContent = state.edit ? 'Done' : 'Edit';
@@ -1147,22 +1250,35 @@ async function addFiles(files) {
     const f = files[i];
     toast(`Preparing ${i + 1} of ${files.length} · ${f.name}`, 0);
     try {
-      if (f.size > MAX_FILE) throw new Error('bigger than 25 MB. Use a shorter or more compressed version.');
-      const ab = await f.arrayBuffer(), bytes = new Uint8Array(ab);
-      let buf;
-      try { buf = await decode(ab.slice(0)); } catch (err) { throw new Error('this device can\'t read that format. MP3, M4A, WAV, AIFF and FLAC work best.'); }
+      let bytes, buf, path, size;
+      if (isVideoFile(f)) {
+        // pull the soundtrack out and store it as WAV; the video itself is never uploaded
+        if (f.size <= 150 * 1048576) { try { buf = await decode(await f.arrayBuffer()); } catch (err) { buf = null; } }
+        if (!buf) buf = await extractByPlaying(f);
+        let peak = 0; const d0 = buf.getChannelData(0); for (let k = 0; k < d0.length; k += 11) { const v = Math.abs(d0[k]); if (v > peak) peak = v; }
+        if (peak < 1e-4) throw new Error('no sound came out of that video.');
+        toast(`Preparing ${i + 1} of ${files.length} · ${f.name}`, 0);
+        bytes = await bufferToWav(buf);
+        buf = await decode(bytes.slice().buffer);
+        path = `sounds/${uid().slice(0, 12)}.wav`; size = bytes.length;
+      } else {
+        if (f.size > MAX_FILE) throw new Error('bigger than 25 MB. Use a shorter or more compressed version.');
+        const ab = await f.arrayBuffer(); bytes = new Uint8Array(ab);
+        try { buf = await decode(ab.slice(0)); } catch (err) { throw new Error('this device can\'t read that format. MP3, M4A, WAV, AIFF and FLAC work best.'); }
+        path = `sounds/${uid().slice(0, 12)}.${extFor(f.name, f.type)}`; size = f.size;
+      }
       if (buf.duration > 600) throw new Error('longer than 10 minutes. Trim it first.');
-      const path = `sounds/${uid().slice(0, 12)}.${extFor(f.name, f.type)}`;
-      try { await IDB.put('audio', path, ab.slice(0)); } catch (e) {}
+      try { await IDB.put('audio', path, bytes.slice().buffer); } catch (e) {}
       buffers.set('f:' + path, buf); failed.delete('f:' + path);
       order += 1;
-      pads.push(cleanPad({ id: uid(), name: prettyName(f.name), group, color: (state.sounds.length + i) % COLOR_N, file: path, original: f.name.slice(0, 120), size: f.size, start: 0, end: null, fadeIn: 0, fadeOut: 0, volume: 1, loop: false, retap: 'restart', order, addedBy: GH.login || null }));
+      pads.push(cleanPad({ id: uid(), name: prettyName(f.name), group, color: (state.sounds.length + i) % COLOR_N, file: path, original: f.name.slice(0, 120), size, start: 0, end: null, fadeIn: 0, fadeOut: 0, volume: 1, loop: false, retap: 'restart', order, addedBy: GH.login || null }));
       upl.push({ path, b64: bytesToB64(bytes) });
-    } catch (err) { problems.push(`${f.name}: ${(err && err.message) || err}`); }
+    } catch (err) { if (!(err && err.skipped)) problems.push(`${f.name}: ${(err && err.message) || err}`); }
   }
   adding = false;
   if (pads.length) enqueue({ type: 'add', pads, files: upl });
   if (problems.length) toast((pads.length ? `Added ${pads.length}. ` : '') + `Couldn't add ${problems.length}: ` + problems.join(' · '), 9000);
+  else if (!pads.length) toast('Nothing was added.');
   else toast(pads.length === 1 ? 'Added. Saving to the shared board…' : `Added ${pads.length} sounds. Saving to the shared board…`);
 }
 function addStarters() {
@@ -1171,6 +1287,203 @@ function addStarters() {
   enqueue({ type: 'add', pads: STARTERS.map((s, i) => cleanPad(Object.assign({ id: uid(), file: null, start: 0, end: null, order: base + i + 1, added: now, addedBy: GH.login || null }, s))) });
   toast('Added the starter sounds.');
 }
+
+/* ---------- small prompt ---------- */
+const ask = { onYes: null, onNo: null };
+function showAsk(o) {
+  $('#askTitle').textContent = o.title; $('#askMsg').textContent = o.msg;
+  $('#askBar').hidden = true; $('#askFill').style.width = '0';
+  $('#askYes').hidden = !o.yes; $('#askYes').textContent = o.yes || '';
+  $('#askNo').textContent = o.no || 'Cancel';
+  ask.onYes = o.onYes || null; ask.onNo = o.onNo || null;
+  $('#ask').hidden = false;
+}
+function askProgress(frac, text) {
+  $('#askBar').hidden = false; $('#askFill').style.width = (clamp(frac, 0, 1) * 100).toFixed(1) + '%';
+  if (text) $('#askMsg').textContent = text;
+}
+function hideAsk() { $('#ask').hidden = true; ask.onYes = ask.onNo = null; }
+$('#askYes').addEventListener('click', () => { const f = ask.onYes; if (f) f(); });
+$('#askNo').addEventListener('click', () => { const f = ask.onNo; hideAsk(); if (f) f(); });
+
+/* Some devices (iPads included) can't decode the sound in a .mov straight away. Then the video is
+   played once, silently, and its sound is captured as it plays. Playing needs a tap, hence the prompt. */
+function extractByPlaying(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file), v = document.createElement('video');
+    v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto'; v.src = url;
+    v.style.cssText = 'position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none';
+    document.body.appendChild(v);
+    let done = false, srcNode = null, node = null, zero = null, rafId = 0, frames = 0;
+    const L = [], R = [];
+    const cleanup = () => {
+      cancelAnimationFrame(rafId);
+      try { v.pause(); } catch (e) {}
+      try { if (srcNode) srcNode.disconnect(); if (node) node.disconnect(); if (zero) zero.disconnect(); } catch (e) {}
+      v.removeAttribute('src'); try { v.load(); } catch (e) {} v.remove(); URL.revokeObjectURL(url);
+    };
+    const fail = (msg, skipped) => { if (done) return; done = true; cleanup(); hideAsk(); const e = new Error(msg); e.skipped = !!skipped; reject(e); };
+    const tmo = setTimeout(() => fail('this device couldn\'t open that video.'), 20000);
+    v.onerror = () => { clearTimeout(tmo); fail('this device couldn\'t open that video.'); };
+    v.onloadedmetadata = () => {
+      clearTimeout(tmo);
+      const dur = v.duration;
+      if (!isFinite(dur) || dur <= 0) return fail('couldn\'t tell how long that video is.');
+      if (dur > 180) return fail('longer than 3 minutes. Trim the video in Photos first, then add it again.');
+      toast('', 1);
+      showAsk({
+        title: 'Get the sound from a video',
+        msg: `To capture the sound from “${file.name}”, the app plays it once with the volume off. That takes ${fmt(dur)}.`,
+        yes: 'Start', no: 'Skip',
+        onNo: () => fail('skipped', true),
+        onYes: () => {
+          const c = getCtx(); unlock();
+          try {
+            srcNode = c.createMediaElementSource(v);
+            node = c.createScriptProcessor(4096, 2, 2);
+            zero = c.createGain(); zero.gain.value = 0;
+            srcNode.connect(node); node.connect(zero); zero.connect(c.destination);
+          } catch (e) { return fail('this device can\'t capture sound from video.'); }
+          node.onaudioprocess = e => {
+            if (v.paused || v.ended) return;
+            const ib = e.inputBuffer;
+            L.push(new Float32Array(ib.getChannelData(0)));
+            R.push(new Float32Array(ib.numberOfChannels > 1 ? ib.getChannelData(1) : ib.getChannelData(0)));
+            frames += ib.length;
+          };
+          const p = v.play(); if (p && p.catch) p.catch(() => fail('the video wouldn\'t play here.'));
+          $('#askYes').hidden = true; $('#askNo').textContent = 'Cancel';
+          ask.onNo = () => fail('skipped', true);
+          const step = () => { askProgress(v.currentTime / dur, `Capturing sound… ${fmt(v.currentTime)} of ${fmt(dur)}`); rafId = requestAnimationFrame(step); };
+          step();
+        }
+      });
+    };
+    v.onended = () => {
+      if (done) return; done = true;
+      const c = getCtx(); cleanup(); hideAsk();
+      if (!frames) { reject(new Error('no sound was captured from that video.')); return; }
+      const b = c.createBuffer(2, frames, c.sampleRate), l = b.getChannelData(0), r = b.getChannelData(1);
+      let o = 0; for (let i = 0; i < L.length; i++) { l.set(L[i], o); r.set(R[i], o); o += L[i].length; }
+      resolve(b);
+    };
+  });
+}
+
+/* ---------- recording from the microphone ---------- */
+const recCv = $('#recLevel');
+const rec = { on: false, stream: null, src: null, node: null, zero: null, chunks: [], frames: 0, hist: [], buf: null, start: 0, end: null, preview: null, t: 0 };
+const REC_MAX = 120;
+function canRecord() { return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia); }
+function openRec() {
+  if (!canEdit()) return;
+  closePop();
+  rec.buf = null; rec.hist = []; rec.frames = 0;
+  $('#recAfter').hidden = true; $('#recTime').textContent = '0:00.0';
+  $('#recMsg').textContent = canRecord() ? 'Tap the red button to start recording with the microphone. Up to 2 minutes.' : 'This browser can\'t use the microphone. Open the soundboard from its home screen icon or in Safari.';
+  $('#recBtn').disabled = !canRecord(); $('#recBtn').classList.remove('on'); $('#recBtn').setAttribute('aria-label', 'Start recording');
+  $('#recGroup').value = state.group !== 'All' ? state.group : 'General';
+  $('#recSheet').hidden = false; document.body.classList.add('locked');
+  requestAnimationFrame(drawRec);
+}
+function closeRec() {
+  if (rec.on) stopRec(true);
+  if (rec.preview) { stopVoice(rec.preview, 0.03); rec.preview = null; }
+  $('#recSheet').hidden = true; document.body.classList.remove('locked');
+}
+async function startRec() {
+  if (rec.on || !canRecord()) return;
+  if (rec.preview) { stopVoice(rec.preview, 0.02); rec.preview = null; }
+  const c = getCtx(); unlock();
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }); }
+  catch (e) {
+    $('#recMsg').textContent = e && e.name === 'NotAllowedError'
+      ? 'Microphone access is blocked. Allow it in the iPad\'s Settings (Privacy & Security → Microphone, or Safari → Microphone), then try again.'
+      : 'Couldn\'t start the microphone: ' + ((e && e.message) || e);
+    return;
+  }
+  try { await c.resume(); } catch (e) {}
+  rec.stream = stream; rec.chunks = []; rec.frames = 0; rec.hist = []; rec.buf = null;
+  rec.src = c.createMediaStreamSource(stream);
+  rec.node = c.createScriptProcessor(4096, 1, 1);
+  rec.zero = c.createGain(); rec.zero.gain.value = 0;
+  rec.src.connect(rec.node); rec.node.connect(rec.zero); rec.zero.connect(c.destination);
+  rec.node.onaudioprocess = e => {
+    if (!rec.on) return;
+    const d = e.inputBuffer.getChannelData(0); rec.chunks.push(new Float32Array(d)); rec.frames += d.length;
+    let m = 0; for (let i = 0; i < d.length; i++) { const v = d[i] < 0 ? -d[i] : d[i]; if (v > m) m = v; }
+    rec.hist.push(m);
+    if (rec.frames >= c.sampleRate * REC_MAX) stopRec(false);
+  };
+  rec.on = true;
+  $('#recBtn').classList.add('on'); $('#recBtn').setAttribute('aria-label', 'Stop recording');
+  $('#recAfter').hidden = true;
+  $('#recMsg').textContent = 'Recording… tap the button again to stop.';
+  requestAnimationFrame(drawRec);
+}
+function stopRec(discard) {
+  if (!rec.on) return;
+  rec.on = false;
+  try { rec.src.disconnect(); rec.node.disconnect(); rec.zero.disconnect(); } catch (e) {}
+  try { rec.stream.getTracks().forEach(t => t.stop()); } catch (e) {}
+  rec.stream = null;
+  $('#recBtn').classList.remove('on'); $('#recBtn').setAttribute('aria-label', 'Start recording');
+  if (discard || !rec.frames) { $('#recMsg').textContent = rec.frames ? 'Recording discarded.' : 'Nothing was recorded. Try again.'; return; }
+  const c = getCtx(), b = c.createBuffer(1, rec.frames, c.sampleRate), d = b.getChannelData(0);
+  let o = 0; for (const ch of rec.chunks) { d.set(ch, o); o += ch.length; }
+  rec.chunks = []; rec.buf = b;
+  const regs = detectRegions(b, 0, b.duration, -42, 0.6);
+  rec.start = regs.length ? regs[0][0] : 0; rec.end = regs.length ? regs[regs.length - 1][1] : null;
+  const trimmed = regs.length && (rec.start > 0.05 || (rec.end != null && b.duration - rec.end > 0.05));
+  $('#recMsg').textContent = `Recorded ${fmt(b.duration)}.` + (trimmed ? ' Quiet bits at the start and end are trimmed off; you can adjust that later in Edit.' : '');
+  $('#recName').value = 'Recording ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  $('#recAfter').hidden = false; $('#recPlayLab').textContent = 'Play it back';
+  drawRec();
+}
+function drawRec() {
+  if ($('#recSheet').hidden) return;
+  const dpr = Math.min(3, window.devicePixelRatio || 1), r = recCv.getBoundingClientRect();
+  const W = Math.max(1, Math.round(r.width * dpr)), H = Math.max(1, Math.round(r.height * dpr));
+  if (recCv.width !== W || recCv.height !== H) { recCv.width = W; recCv.height = H; }
+  if (!TOK.ink) readTokens();
+  const g = recCv.getContext('2d'); g.clearRect(0, 0, W, H);
+  const bw = 3 * dpr, gap = 2 * dpr, n = Math.floor(W / (bw + gap)), hist = rec.hist.slice(-n);
+  g.fillStyle = rec.on ? TOK.danger || '#e0654c' : TOK.bronze;
+  hist.forEach((m, i) => { const h = Math.max(2 * dpr, Math.min(1, Math.sqrt(m)) * H * 0.9); g.fillRect(i * (bw + gap), (H - h) / 2, bw, h); });
+  if (rec.on) {
+    $('#recTime').textContent = fmtClock(rec.frames / getCtx().sampleRate);
+    requestAnimationFrame(drawRec);
+  }
+}
+function fmtClock(t) { const m = Math.floor(t / 60), s = t - m * 60; return m + ':' + (s < 10 ? '0' : '') + s.toFixed(1); }
+$('#btnRec').addEventListener('click', openRec);
+$('#recClose').addEventListener('click', closeRec);
+$('#recBtn').addEventListener('click', () => { if (rec.on) stopRec(false); else startRec(); });
+$('#recPlay').addEventListener('click', () => {
+  if (!rec.buf) return;
+  if (rec.preview) { stopVoice(rec.preview, 0.03); rec.preview = null; $('#recPlayLab').textContent = 'Play it back'; return; }
+  unlock();
+  rec.preview = play({ id: '__rec', start: rec.start, end: rec.end, volume: 1 }, { buf: rec.buf, preview: true });
+  $('#recPlayLab').textContent = 'Stop';
+  if (rec.preview) rec.preview.src.addEventListener('ended', () => { rec.preview = null; $('#recPlayLab').textContent = 'Play it back'; });
+});
+$('#recSave').addEventListener('click', async () => {
+  if (!rec.buf) return;
+  const b = $('#recSave'); b.disabled = true;
+  try {
+    const bytes = encodeWav([rec.buf.getChannelData(0)], rec.buf.sampleRate);
+    if (bytes.length > MAX_FILE) throw new Error('that recording is too long to store.');
+    const path = `sounds/${uid().slice(0, 12)}.wav`, k = 'f:' + path;
+    try { await IDB.put('audio', path, bytes.slice().buffer); } catch (e) {}
+    buffers.set(k, rec.buf); failed.delete(k);
+    const name = $('#recName').value.trim() || 'Recording', group = $('#recGroup').value.trim() || 'General';
+    enqueue({ type: 'add', pads: [cleanPad({ id: uid(), name, group, color: state.sounds.length % COLOR_N, file: path, original: 'Microphone recording, ' + new Date().toLocaleString(), size: bytes.length, start: rec.start, end: rec.end, fadeIn: 0, fadeOut: 30, volume: 1, loop: false, retap: 'restart', order: maxOrder() + 1, addedBy: GH.login || null })], files: [{ path, b64: bytesToB64(bytes) }] });
+    toast(`Added “${name}”. Saving to the shared board…`);
+    rec.buf = null; closeRec();
+  } catch (e) { toast('Couldn\'t add the recording: ' + ((e && e.message) || e), 6000); }
+  b.disabled = false;
+});
 
 /* ---------- settings ---------- */
 const pop = $('#pop');
@@ -1257,7 +1570,7 @@ masterIn.addEventListener('input', () => {
 const ed = { open: false, preview: null };
 const wave = $('#wave'), ov = $('#overview');
 let TOK = {};
-function readTokens() { TOK = { ink: CSSV('--ink') || '#ece4d4', ground: CSSV('--ground') || '#0d1417', bronze: CSSV('--bronze') || '#cf9455', line: CSSV('--line') || '#29393f' }; for (let i = 0; i < COLOR_N; i++) TOK['p' + i] = CSSV('--p' + i); }
+function readTokens() { TOK = { ink: CSSV('--ink') || '#ece4d4', ground: CSSV('--ground') || '#0d1417', bronze: CSSV('--bronze') || '#cf9455', line: CSSV('--line') || '#29393f', danger: CSSV('--danger') || '#e0654c' }; for (let i = 0; i < COLOR_N; i++) TOK['p' + i] = CSSV('--p' + i); }
 $('#edColors').innerHTML = Array.from({ length: COLOR_N }, (_, i) => `<label class="sw c${i}"><input type="radio" name="edColor" value="${i}" aria-label="Colour ${i + 1}"></label>`).join('');
 
 function openEditor(id) {
@@ -1568,7 +1881,8 @@ $('#edCancel').addEventListener('click', () => closeEditor());
 $('#sheet').addEventListener('click', e => { if (e.target === $('#sheet')) closeEditor(); });
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
-  if (ed.open) closeEditor(); else if (!pop.hidden) closePop();
+  if (!$('#ask').hidden) return;
+  if (!$('#recSheet').hidden) closeRec(); else if (ed.open) closeEditor(); else if (!pop.hidden) closePop();
 });
 
 /* split at cursor */
@@ -1687,6 +2001,8 @@ async function init() {
   window.addEventListener('offline', () => { sync.offline = true; renderChips(); });
   if (state.wake) applyWake();
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost') && !window.ATO_CONFIG) {
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) toast('A new version of the app is ready. Close and reopen it to use it.', 6000); });
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 }

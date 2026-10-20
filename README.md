@@ -23,6 +23,12 @@ Anyone with the link can open the app and play the sounds. Only the repo owner a
 
 The key is saved only on the device where it was pasted. When it expires, the app says so; make a new one and paste it in. Nothing unsaved is lost.
 
+## Adding sounds
+
+- **Add sounds** takes audio files (MP3, M4A, WAV, AIFF, FLAC) and videos (MOV, MP4, M4V, WebM) from Files or Photos. For a video, only its sound is kept, saved as a WAV file; the video itself isn't uploaded. If the iPad can't read a video's sound directly, the app plays the video once with the volume off to capture it, which takes as long as the clip (videos up to 3 minutes).
+- **Record** uses the microphone, up to 2 minutes per take. Quiet bits at the start and end are trimmed off automatically, and you can adjust that afterwards in Edit.
+- Only add videos and audio you made yourself or are allowed to use. The repo is public, so everything on the board can be downloaded by anyone who finds it.
+
 ## How it works
 
 - `main` branch: the app (`index.html`, the offline worker, icons). GitHub Pages serves this.
@@ -34,7 +40,7 @@ The key is saved only on the device where it was pasted. When it expires, the ap
 
 ## Limits
 
-- Files up to 25 MB and 10 minutes each. MP3, M4A, WAV, AIFF and FLAC work best on iPad.
+- Files up to 25 MB and 10 minutes each. MP3, M4A, WAV, AIFF and FLAC work best on iPad. Sound taken from videos and recordings is stored as WAV, which is bigger than MP3; a long clip is saved in mono or at a lower quality so it fits.
 - GitHub Pages sites are capped at 1 GB, which is plenty for sound effects but would fill up with lots of long music tracks.
 - The repo is public, so anyone who finds it can download the sounds. Avoid uploading anything you wouldn't want public.
 - Without a key, a device can sync about 60 times an hour per network (GitHub's limit for anonymous requests). The app syncs every 5 minutes without a key and every minute with one.
