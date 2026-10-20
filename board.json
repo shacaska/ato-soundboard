@@ -2,26 +2,6 @@
   "format": 1,
   "pads": [
     {
-      "id": "starter-thunder",
-      "name": "Thunder",
-      "group": "Battle",
-      "color": 5,
-      "file": null,
-      "builtin": "thunder",
-      "original": null,
-      "size": null,
-      "start": 0,
-      "end": null,
-      "fadeIn": 0,
-      "fadeOut": 600,
-      "volume": 1,
-      "loop": false,
-      "retap": "restart",
-      "order": 2,
-      "added": "2026-10-20T00:00:00.000Z",
-      "addedBy": "shacaska"
-    },
-    {
       "id": "starter-gong",
       "name": "Temple gong",
       "group": "Moments",
