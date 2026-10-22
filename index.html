@@ -210,6 +210,31 @@ main{padding-block:14px calc(104px + env(safe-area-inset-bottom,0px))}
 .rec-fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.2fr);gap:12px 14px}
 @media (max-width:520px){.rec-fields{grid-template-columns:1fr}}
 
+/* combine */
+#combCv{display:block;width:100%;border-radius:8px;background:var(--ground);border:1px solid var(--line);touch-action:pan-y}
+.comb-tools{display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center}
+.comb-tools .gap{display:flex;align-items:center;gap:8px;color:var(--ink-2);font-size:15px;flex:1;min-width:220px}
+.comb-tools .gap input{flex:1;min-width:90px}
+.comb-tools output{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;min-width:5ch}
+.cl-list{display:flex;flex-direction:column;gap:8px}
+.cl-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto auto;gap:10px 14px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r);background:var(--ground)}
+.cl-row.sel{border-color:var(--bronze)}
+.cl-row .dot{width:12px;height:12px;border-radius:50%;background:var(--c)}
+.cl-row .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cl-f{display:flex;align-items:center;gap:6px;color:var(--ink-2);font-size:14px;white-space:nowrap}
+.cl-f input[type=number]{width:78px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--panel);padding:0 8px;font-size:16px;font-variant-numeric:tabular-nums}
+.cl-f input[type=range]{width:110px}
+.cl-f output{color:var(--ink);font-variant-numeric:tabular-nums;min-width:4ch}
+.cl-add{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.cl-add select{height:36px;min-width:0;flex:1;max-width:360px;border-radius:8px;border:1px solid var(--line);background:var(--ground);padding:0 10px;font-size:16px}
+.comb-out{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.2fr);gap:12px 14px;padding-top:14px;border-top:1px solid var(--line)}
+@media (max-width:700px){
+  .cl-row{grid-template-columns:auto minmax(0,1fr) auto}
+  .cl-row .cl-f{grid-column:1/-1}
+  .cl-row .cl-x{grid-row:1;grid-column:3}
+  .comb-out{grid-template-columns:1fr}
+}
+
 /* toast */
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;max-width:min(560px,calc(100vw - 32px));padding:12px 16px;border-radius:var(--r);background:var(--ink);color:var(--ground);font-size:16px;font-weight:500;line-height:1.35;box-shadow:0 10px 30px rgba(0,0,0,.5);pointer-events:none}
 
@@ -357,6 +382,8 @@ main{padding-block:14px calc(104px + env(safe-area-inset-bottom,0px))}
         <button class="btn sm" id="edEarlier">Move earlier</button>
         <button class="btn sm" id="edLater">Move later</button>
         <button class="btn sm" id="edDup">Duplicate</button>
+        <button class="btn sm" id="edComb">Combine with others</button>
+        <button class="btn sm" id="edMix" hidden>Change the combination</button>
         <span class="sp"></span>
         <button class="btn sm danger" id="edDel">Delete</button>
       </section>
@@ -389,6 +416,42 @@ main{padding-block:14px calc(104px + env(safe-area-inset-bottom,0px))}
           <button class="btn sm primary" id="recSave">Add to board</button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="combSheet" hidden role="dialog" aria-modal="true" aria-labelledby="combTitle">
+  <div class="sheet-panel">
+    <div class="sheet-head">
+      <h2 id="combTitle">Combine sounds</h2>
+      <button class="btn ghost" id="combCancel">Cancel</button>
+      <button class="btn" id="combSaveNew" hidden>Add as new pad</button>
+      <button class="btn primary" id="combSave">Add to board</button>
+    </div>
+    <div class="sheet-body">
+      <p class="note">Pick sounds from your board, then line them up one after another or stack them so they play together. Drag a sound along the timeline to change when it starts.</p>
+      <div class="cl-add">
+        <select id="combPick" aria-label="Sound to add"></select>
+        <button class="btn sm primary" id="combAdd"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add</button>
+      </div>
+      <canvas id="combCv" aria-label="Timeline of the sounds in this combination. Drag a sound sideways to move it."></canvas>
+      <div class="comb-tools">
+        <div class="seg" id="combMode">
+          <button data-mode="line" aria-pressed="true">One after another</button>
+          <button data-mode="stack" aria-pressed="false">All together</button>
+        </div>
+        <label class="gap" id="combGapRow">Gap <input type="range" id="combGap" min="-2" max="2" step="0.05" value="0"><output id="combGapOut">0.00 s</output></label>
+      </div>
+      <div class="row">
+        <button class="btn sm" id="combPlay"><svg class="i f" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg><span id="combPlayLab">Play</span></button>
+        <span class="hint" id="combInfo"></span>
+      </div>
+      <div class="cl-list" id="combList"></div>
+      <div class="comb-out">
+        <label class="fld"><span>Name</span><input type="text" id="combName" maxlength="60" autocomplete="off"></label>
+        <label class="fld"><span>Group</span><input type="text" id="combGroup" maxlength="30" list="groupList" autocomplete="off"></label>
+      </div>
+      <p class="src-note">The new sound is saved as its own file. The sounds you combined stay on the board unchanged, and you can reopen the combination later from Edit to adjust it.</p>
     </div>
   </div>
 </div>
@@ -786,6 +849,7 @@ function voicesChanged() {
   Promise.resolve().then(() => {
     voicesDirty = false;
     if (ed.preview && !voices.has(ed.preview)) { ed.preview = null; }
+    if (comb.preview && !voices.has(comb.preview)) { comb.preview = null; if (comb.open) { updateCombPlay(); drawComb(); } }
     updatePlaying(); renderNow(); if (ed.open) { updatePlayBtn(); drawWave(); }
   });
 }
@@ -805,6 +869,7 @@ function tick() {
     el.style.setProperty('--p', clamp(p, 0, 1).toFixed(4));
   }
   if (ed.open && ed.preview) drawWave();
+  if (comb.open && comb.preview) drawComb();
   if (voices.size) raf = requestAnimationFrame(tick);
 }
 
@@ -902,6 +967,7 @@ function applyOp(board, op) {
   else if (op.type === 'remove') { const s = new Set(op.ids); for (let i = pads.length - 1; i >= 0; i--) if (s.has(pads[i].id)) pads.splice(i, 1); }
   else if (op.type === 'regroup') { for (let i = 0; i < pads.length; i++) if (groupOf(pads[i]) === op.from) pads[i] = Object.assign({}, pads[i], { group: op.to }); }
   else if (op.type === 'order') { for (const [id, o] of op.changes) { const i = at(id); if (i >= 0) pads[i] = Object.assign({}, pads[i], { order: o }); } }
+  else if (op.type === 'reaudio') { const i = at(op.id); if (i >= 0) pads[i] = Object.assign({}, pads[i], op.fields, { id: pads[i].id, file: op.file, builtin: null }); }
   return { format: 1, pads };
 }
 function opLabel(op) {
@@ -910,6 +976,7 @@ function opLabel(op) {
   if (op.type === 'remove') return op.ids.length === 1 ? `Delete “${op.name || 'pad'}”` : `Delete ${op.ids.length} pads`;
   if (op.type === 'regroup') return `Rename group ${op.from} → ${op.to}`;
   if (op.type === 'order') return 'Reorder pads';
+  if (op.type === 'reaudio') return `Update combination “${op.name || 'pad'}”`;
   return 'Update board';
 }
 const filesIn = board => new Set(board.pads.filter(p => p.file).map(p => p.file));
@@ -1075,7 +1142,8 @@ function cleanPad(d) {
     retap: ['restart', 'stop', 'layer'].indexOf(d.retap) >= 0 ? d.retap : (d.loop ? 'stop' : 'restart'),
     order: +d.order || 0,
     added: d.added || new Date().toISOString(),
-    addedBy: d.addedBy || null
+    addedBy: d.addedBy || null,
+    mix: Array.isArray(d.mix) && d.mix.length ? d.mix.slice(0, 40).map(m => ({ id: String(m.id), offset: +(+m.offset || 0).toFixed(4), gain: +clamp(m.gain == null ? 1 : +m.gain, 0, 2).toFixed(3) })) : null
   };
 }
 function fieldsOf(d) { const c = cleanPad(d); delete c.id; delete c.file; delete c.builtin; return c; }
@@ -1106,7 +1174,7 @@ function renderGrid() {
       <span class="pad-meta"><span>${meta}</span>${s.loop ? ICON_LOOP : ''}${state.group === 'All' ? `<span class="g">${esc(groupOf(s))}</span>` : ''}${s.builtin ? '<span class="pad-tag">Starter</span>' : ''}</span>
       <span class="pad-edit" aria-hidden="true">${ICON_PEN}</span>
       <span class="pad-prog"></span></button>`;
-  }).join('') + (state.edit && canEdit() ? `<button class="add-tile" id="addTile"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add sounds</button>` : '');
+  }).join('') + (state.edit && canEdit() ? `<button class="add-tile" id="addTile"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add sounds</button><button class="add-tile" id="combTile"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="11" height="5" rx="1.5"/><rect x="10" y="14" width="11" height="5" rx="1.5"/></svg>Combine sounds</button>` : '');
   $$('.pad', grid).forEach(el => padEls.set(el.dataset.id, el));
   updatePlaying();
   const eb = $('#emptyBox');
@@ -1199,6 +1267,7 @@ grid.addEventListener('pointercancel', e => endPress(e, true));
 grid.addEventListener('pointerleave', e => { if (press && e.pointerId === press.pid && e.pointerType === 'mouse') { press.el.classList.remove('down'); press = null; } });
 grid.addEventListener('click', e => {
   if (e.target.closest('#addTile')) { pickFiles(); return; }
+  if (e.target.closest('#combTile')) { openComb({ ids: [] }); return; }
   const pad = e.target.closest('.pad'); if (!pad) return;
   if (state.edit) { openEditor(pad.dataset.id); return; }
   if (e.detail === 0) { const s = state.byId.get(pad.dataset.id); if (s) { unlock(); trigger(s); } }
@@ -1486,6 +1555,280 @@ $('#recSave').addEventListener('click', async () => {
   b.disabled = false;
 });
 
+/* ---------- combine: splice sounds one after another, or layer them ---------- */
+const combCv = $('#combCv');
+const comb = { open: false, clips: [], sel: null, mode: 'line', sourceId: null, preview: null, cache: null, drag: null, span: 1, dpr: 1 };
+const LANE = 46, RULER = 24;
+function padLen(p) {
+  const b = bufFor(p); if (!b) return 0;
+  const s = clamp(+p.start || 0, 0, b.duration), e = clamp(p.end == null ? b.duration : +p.end, s, b.duration);
+  return e - s;
+}
+function combEnd() { let end = 0; for (const c of comb.clips) { const p = state.byId.get(c.padId); if (p) end = Math.max(end, c.offset + padLen(p)); } return end; }
+function openComb(o) {
+  if (!canEdit()) return;
+  closePop();
+  comb.clips = []; comb.sel = null; comb.mode = 'line'; comb.sourceId = null; comb.cache = null;
+  let name = '', group = state.group !== 'All' ? state.group : '';
+  if (o.sourceId) {
+    const src = state.byId.get(o.sourceId);
+    if (src && Array.isArray(src.mix)) {
+      comb.sourceId = src.id; comb.mode = 'free'; name = src.name; group = src.group;
+      let missing = 0;
+      for (const m of src.mix) { if (state.byId.has(m.id)) comb.clips.push({ k: uid(), padId: m.id, offset: Math.max(0, +m.offset || 0), gain: m.gain == null ? 1 : +m.gain }); else missing++; }
+      if (missing) toast(`${missing} of the sounds in this combination ${missing === 1 ? 'has' : 'have'} been deleted, so ${missing === 1 ? 'it\'s' : 'they\'re'} left out.`, 6000);
+    }
+  }
+  for (const id of o.ids || []) if (state.byId.has(id)) addClip(id, true);
+  $('#combName').value = name; $('#combGroup').value = group || (comb.clips[0] ? groupOf(state.byId.get(comb.clips[0].padId)) : 'General');
+  comb.nameTouched = !!name;
+  $('#combTitle').textContent = comb.sourceId ? 'Change the combination' : 'Combine sounds';
+  $('#combSave').textContent = comb.sourceId ? 'Update pad' : 'Add to board';
+  $('#combSaveNew').hidden = !comb.sourceId;
+  $('#combGap').value = 0; $('#combGapOut').textContent = '0.00 s';
+  fillPicker(); setMode(comb.mode, true); renderCombList();
+  $('#combSheet').hidden = false; document.body.classList.add('locked'); comb.open = true;
+  readTokens();
+  requestAnimationFrame(() => { fitComb(); drawComb(); });
+}
+function closeComb() {
+  if (comb.preview) { stopVoice(comb.preview, 0.03); comb.preview = null; }
+  comb.open = false; $('#combSheet').hidden = true; document.body.classList.remove('locked');
+}
+function fillPicker() {
+  const gs = groups().map(([g]) => g);
+  $('#combPick').innerHTML = `<option value="">Choose a sound to add…</option>` + gs.map(g => `<optgroup label="${esc(g)}">` + state.sounds.filter(s => groupOf(s) === g).map(s => {
+    const ok = !!bufFor(s);
+    return `<option value="${esc(s.id)}"${ok ? '' : ' disabled'}>${esc(s.name)}${ok ? ' · ' + fmtShort(padLen(s)) : ' (not downloaded yet)'}</option>`;
+  }).join('') + `</optgroup>`).join('');
+}
+function addClip(id, quiet) {
+  const p = state.byId.get(id); if (!p) return;
+  if (!bufFor(p)) { toast(`“${p.name}” hasn't downloaded yet.`); return; }
+  if (comb.clips.length >= 24) { toast('A combination can hold up to 24 sounds.'); return; }
+  const gap = +$('#combGap').value || 0;
+  const offset = comb.mode === 'stack' || !comb.clips.length ? 0 : Math.max(0, combEnd() + gap);
+  const c = { k: uid(), padId: id, offset: +offset.toFixed(3), gain: 1 };
+  comb.clips.push(c); comb.sel = c.k; comb.cache = null;
+  if (!quiet) { autoName(); renderCombList(); fitComb(); drawComb(); }
+}
+function autoName() {
+  if (comb.nameTouched) return;
+  const names = comb.clips.map(c => (state.byId.get(c.padId) || {}).name).filter(Boolean);
+  $('#combName').value = names.join(' + ').slice(0, 60);
+}
+function setMode(mode, silent) {
+  comb.mode = mode;
+  $$('#combMode button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === mode ? 'true' : 'false'));
+  $('#combGapRow').hidden = mode === 'stack';
+  if (silent) return;
+  arrange(); renderCombList(); fitComb(); drawComb();
+}
+function arrange() {
+  if (comb.mode === 'stack') comb.clips.forEach(c => { c.offset = 0; });
+  else if (comb.mode === 'line') {
+    const gap = +$('#combGap').value || 0; let t = 0;
+    comb.clips.forEach((c, i) => { const p = state.byId.get(c.padId); c.offset = +Math.max(0, i ? t + gap : 0).toFixed(3); t = c.offset + (p ? padLen(p) : 0); });
+  }
+  comb.cache = null;
+}
+function renderCombList() {
+  const box = $('#combList');
+  if (!comb.clips.length) { box.innerHTML = ''; }
+  else box.innerHTML = comb.clips.map(c => {
+    const p = state.byId.get(c.padId); if (!p) return '';
+    return `<div class="cl-row${c.k === comb.sel ? ' sel' : ''}" data-k="${c.k}">
+      <span class="dot c${(p.color | 0) % COLOR_N}"></span><span class="nm">${esc(p.name)}</span>
+      <label class="cl-f">Starts at <input type="number" class="cl-off" step="0.05" min="0" inputmode="decimal" value="${c.offset.toFixed(2)}"> s</label>
+      <label class="cl-f">Volume <input type="range" class="cl-vol" min="0" max="200" step="1" value="${Math.round(c.gain * 100)}"><output>${Math.round(c.gain * 100)}%</output></label>
+      <button class="btn sm icon cl-x" aria-label="Remove ${esc(p.name)}">${ICON_X}</button></div>`;
+  }).join('');
+  const end = combEnd();
+  $('#combInfo').textContent = comb.clips.length ? `${comb.clips.length} sound${comb.clips.length > 1 ? 's' : ''} · ${fmt(end)} long` : 'Add a sound to start.';
+  $('#combSave').disabled = !comb.clips.length; $('#combSaveNew').disabled = !comb.clips.length; $('#combPlay').disabled = !comb.clips.length;
+}
+function fitComb() {
+  const dpr = Math.min(3, window.devicePixelRatio || 1); comb.dpr = dpr;
+  const lanes = Math.max(1, comb.clips.length), hCss = RULER + lanes * LANE + 8;
+  combCv.style.height = hCss + 'px';
+  const r = combCv.getBoundingClientRect();
+  combCv.width = Math.max(1, Math.round(r.width * dpr)); combCv.height = Math.round(hCss * dpr);
+  comb.span = Math.max(1, combEnd() * 1.15);
+}
+function drawMini(g, p, buf, s, e, x, y, w, h, color) {
+  const P = peaksFor(padKey(p), buf), sr = buf.sampleRate, amp = h * 0.45 / Math.max(0.05, P.peak), mid = y + h / 2, cols = Math.max(1, Math.floor(w));
+  g.fillStyle = color;
+  for (let i = 0; i < cols; i++) {
+    const t0 = s + (e - s) * i / cols, t1 = s + (e - s) * (i + 1) / cols;
+    const b0 = Math.floor(t0 * sr / P.bin), b1 = Math.min(P.mn.length, Math.max(b0 + 1, Math.ceil(t1 * sr / P.bin)));
+    let lo = 1, hi = -1;
+    for (let b = b0; b < b1; b++) { if (P.mn[b] < lo) lo = P.mn[b]; if (P.mx[b] > hi) hi = P.mx[b]; }
+    if (hi >= lo) g.fillRect(x + i, mid - hi * amp, 1, Math.max(1, (hi - lo) * amp));
+  }
+}
+function drawComb() {
+  if (!comb.open || !combCv.width) return;
+  const g = combCv.getContext('2d'), W = combCv.width, H = combCv.height, dpr = comb.dpr, pps = W / comb.span;
+  g.clearRect(0, 0, W, H);
+  drawRuler(g, W, H, 0, comb.span, dpr);
+  if (!comb.clips.length) {
+    g.fillStyle = TOK.ink; g.globalAlpha = 0.45; g.font = `500 ${15 * dpr}px ${FONT}`; g.textBaseline = 'middle';
+    g.fillText('Choose a sound above and tap Add.', 12 * dpr, (RULER + LANE / 2) * dpr); g.globalAlpha = 1;
+  }
+  comb.clips.forEach((c, i) => {
+    const p = state.byId.get(c.padId); if (!p) return;
+    const buf = bufFor(p), y = (RULER + i * LANE + 4) * dpr, h = (LANE - 8) * dpr;
+    const len = padLen(p), x = c.offset * pps, w = Math.max(3 * dpr, len * pps);
+    const col = TOK['p' + ((p.color | 0) % COLOR_N)] || TOK.bronze;
+    g.globalAlpha = 0.28; g.fillStyle = col; rr(g, x, y, w, h, 5 * dpr); g.fill(); g.globalAlpha = 1;
+    if (buf) { const s = clamp(+p.start || 0, 0, buf.duration); g.save(); rr(g, x, y, w, h, 5 * dpr); g.clip(); drawMini(g, p, buf, s, s + len, x, y, w, h, col); g.restore(); }
+    g.lineWidth = (c.k === comb.sel ? 2.5 : 1.2) * dpr; g.strokeStyle = c.k === comb.sel ? TOK.ink : col; rr(g, x, y, w, h, 5 * dpr); g.stroke();
+    g.save(); rr(g, x, y, w, h, 5 * dpr); g.clip();
+    g.fillStyle = TOK.ink; g.font = `600 ${13 * dpr}px ${FONT}`; g.textBaseline = 'top'; g.fillText(p.name, x + 7 * dpr, y + 5 * dpr);
+    g.restore();
+  });
+  if (comb.preview && voices.has(comb.preview)) { const xp = voicePos(comb.preview) * pps; g.fillStyle = TOK.bronze; g.fillRect(xp - dpr, 0, 2 * dpr, H); }
+}
+function clipAt(xCss, yCss) {
+  const w = combCv.getBoundingClientRect().width || 1, pps = w / comb.span, lane = Math.floor((yCss - RULER) / LANE);
+  const c = comb.clips[lane]; if (!c) return null;
+  const p = state.byId.get(c.padId), x0 = c.offset * pps, x1 = x0 + Math.max(6, padLen(p) * pps);
+  return xCss >= x0 - 6 && xCss <= x1 + 6 ? c : null;
+}
+combCv.addEventListener('pointerdown', e => {
+  const r = combCv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, c = clipAt(x, y);
+  if (!c) { if (comb.sel) { comb.sel = null; renderCombList(); drawComb(); } return; }
+  e.preventDefault();
+  try { combCv.setPointerCapture(e.pointerId); } catch (err) {}
+  comb.sel = c.k; comb.drag = { k: c.k, x0: x, off0: c.offset, pid: e.pointerId, moved: false };
+  renderCombList(); drawComb();
+});
+combCv.addEventListener('pointermove', e => {
+  const d = comb.drag; if (!d || e.pointerId !== d.pid) return;
+  const r = combCv.getBoundingClientRect(), x = e.clientX - r.left, pps = (r.width || 1) / comb.span;
+  if (!d.moved && Math.abs(x - d.x0) < 4) return;
+  d.moved = true;
+  const c = comb.clips.find(q => q.k === d.k), p = state.byId.get(c.padId), len = padLen(p);
+  let off = Math.max(0, d.off0 + (x - d.x0) / pps);
+  // snap the start or end to 0 and to the edges of the other sounds
+  const marks = [0]; for (const o of comb.clips) if (o !== c) { const op = state.byId.get(o.padId); marks.push(o.offset, o.offset + padLen(op)); }
+  let best = null;
+  for (const m of marks) { for (const cand of [m, m - len]) { if (cand < 0) continue; const dx = Math.abs((cand - off) * pps); if (dx < 10 && (!best || dx < best.dx)) best = { dx, v: cand }; } }
+  if (best) off = best.v;
+  c.offset = +off.toFixed(3); comb.cache = null;
+  if (comb.mode !== 'free') setMode('free', true);
+  const row = $(`#combList .cl-row[data-k="${c.k}"] .cl-off`); if (row) row.value = c.offset.toFixed(2);
+  drawComb();
+});
+function combUp(e) {
+  const d = comb.drag; if (!d || e.pointerId !== d.pid) return;
+  comb.drag = null;
+  if (d.moved) { comb.span = Math.max(1, combEnd() * 1.15); renderCombList(); drawComb(); }
+}
+combCv.addEventListener('pointerup', combUp);
+combCv.addEventListener('pointercancel', combUp);
+$('#combList').addEventListener('input', e => {
+  const row = e.target.closest('.cl-row'); if (!row) return;
+  const c = comb.clips.find(q => q.k === row.dataset.k); if (!c) return;
+  if (e.target.classList.contains('cl-vol')) { c.gain = e.target.value / 100; row.querySelector('output').textContent = e.target.value + '%'; comb.cache = null; }
+  if (e.target.classList.contains('cl-off')) { const v = parseFloat(e.target.value); if (isFinite(v)) { c.offset = clamp(v, 0, 600); comb.cache = null; if (comb.mode !== 'free') setMode('free', true); drawComb(); } }
+});
+$('#combList').addEventListener('change', e => { if (e.target.classList.contains('cl-off')) { fitComb(); renderCombList(); drawComb(); } });
+$('#combList').addEventListener('click', e => {
+  const row = e.target.closest('.cl-row'); if (!row) return;
+  if (e.target.closest('.cl-x')) {
+    comb.clips = comb.clips.filter(q => q.k !== row.dataset.k); comb.cache = null;
+    if (comb.mode === 'line') arrange();
+    autoName(); renderCombList(); fitComb(); drawComb(); return;
+  }
+  if (comb.sel !== row.dataset.k) { comb.sel = row.dataset.k; $$('#combList .cl-row').forEach(r => r.classList.toggle('sel', r === row)); drawComb(); }
+});
+$('#combAdd').addEventListener('click', () => { const id = $('#combPick').value; if (!id) { toast('Choose a sound from the list first.'); return; } addClip(id); $('#combPick').value = ''; });
+$('#combMode').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.mode); });
+$('#combGap').addEventListener('input', () => {
+  const v = +$('#combGap').value;
+  $('#combGapOut').textContent = (v < 0 ? '−' : '') + Math.abs(v).toFixed(2) + ' s' + (v < 0 ? ' overlap' : '');
+  if (comb.mode !== 'line') setMode('line', true);
+  arrange(); renderCombList(); fitComb(); drawComb();
+});
+$('#combName').addEventListener('input', () => { comb.nameTouched = true; });
+$('#combCancel').addEventListener('click', closeComb);
+window.addEventListener('resize', () => { if (comb.open) { fitComb(); drawComb(); } });
+
+async function renderMix() {
+  const sig = JSON.stringify(comb.clips.map(c => { const p = state.byId.get(c.padId) || {}; return [c.padId, c.offset, c.gain, p.start, p.end, p.volume, p.fadeIn, p.fadeOut, p.file || p.builtin]; }));
+  if (comb.cache && comb.cache.sig === sig) return comb.cache;
+  const sr = getCtx().sampleRate, items = []; let end = 0;
+  for (const c of comb.clips) {
+    const p = state.byId.get(c.padId); if (!p) continue;
+    const buf = bufFor(p); if (!buf) throw new Error(`“${p.name}” hasn't downloaded yet`);
+    const s = clamp(+p.start || 0, 0, buf.duration), e = clamp(p.end == null ? buf.duration : +p.end, s, buf.duration);
+    if (e - s < 0.005) continue;
+    items.push({ p, buf, s, dur: e - s, off: Math.max(0, +c.offset || 0), vol: clamp((p.volume == null ? 1 : +p.volume) * c.gain, 0, 4) });
+    end = Math.max(end, c.offset + e - s);
+  }
+  if (!items.length) throw new Error('add at least one sound first');
+  if (end > 600) throw new Error('the combination is longer than 10 minutes');
+  const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext, oc = new OAC(2, Math.max(1, Math.ceil(end * sr)), sr);
+  for (const it of items) {
+    const src = oc.createBufferSource(), g = oc.createGain();
+    src.buffer = it.buf; src.connect(g); g.connect(oc.destination);
+    let fi = Math.max(0.003, (+it.p.fadeIn || 0) / 1000), fo = Math.max(0.003, (+it.p.fadeOut || 0) / 1000);
+    if (fi + fo > it.dur) { const k = it.dur / (fi + fo); fi *= k; fo *= k; }
+    g.gain.setValueAtTime(0, it.off); g.gain.linearRampToValueAtTime(it.vol, it.off + fi);
+    g.gain.setValueAtTime(it.vol, it.off + it.dur - fo); g.gain.linearRampToValueAtTime(0, it.off + it.dur);
+    src.start(it.off, it.s, it.dur);
+  }
+  const out = await renderOffline(oc);
+  let peak = 0;
+  for (let ch = 0; ch < out.numberOfChannels; ch++) { const d = out.getChannelData(ch); for (let i = 0; i < d.length; i++) { const v = d[i] < 0 ? -d[i] : d[i]; if (v > peak) peak = v; } }
+  const scaled = peak > 0.98;
+  if (scaled) { const k = 0.98 / peak; for (let ch = 0; ch < out.numberOfChannels; ch++) { const d = out.getChannelData(ch); for (let i = 0; i < d.length; i++) d[i] *= k; } }
+  comb.cache = { sig, buf: out, scaled };
+  return comb.cache;
+}
+function updateCombPlay() { $('#combPlayLab').textContent = comb.preview ? 'Stop' : 'Play'; }
+$('#combPlay').addEventListener('click', async () => {
+  if (comb.preview) { stopVoice(comb.preview, 0.03); comb.preview = null; updateCombPlay(); drawComb(); return; }
+  unlock();
+  try {
+    const r = await renderMix();
+    const c = getCtx(); if (c.state !== 'running') { try { await c.resume(); } catch (e) {} }
+    comb.preview = play({ id: '__comb', start: 0, end: null, volume: 1 }, { buf: r.buf, preview: true });
+    if (r.scaled) $('#combInfo').textContent = `${comb.clips.length} sounds · ${fmt(r.buf.duration)} long · turned down slightly so it doesn't distort`;
+    updateCombPlay(); drawComb();
+  } catch (e) { toast('Couldn\'t play it: ' + ((e && e.message) || e) + '.'); }
+});
+async function saveComb(asNew) {
+  if (!comb.clips.length) return;
+  const btns = [$('#combSave'), $('#combSaveNew')]; btns.forEach(b => { b.disabled = true; });
+  try {
+    toast('Mixing…', 0);
+    const r = await renderMix();
+    const bytes = await bufferToWav(r.buf), dec = await decode(bytes.slice().buffer);
+    const path = `sounds/${uid().slice(0, 12)}.wav`, k = 'f:' + path;
+    try { await IDB.put('audio', path, bytes.slice().buffer); } catch (e) {}
+    buffers.set(k, dec); failed.delete(k);
+    const names = comb.clips.map(c => (state.byId.get(c.padId) || {}).name).filter(Boolean);
+    const name = $('#combName').value.trim() || names.join(' + ').slice(0, 60) || 'Combination';
+    const group = $('#combGroup').value.trim() || 'General';
+    const mix = comb.clips.map(c => ({ id: c.padId, offset: c.offset, gain: c.gain }));
+    const original = ('Combined from ' + names.join(', ')).slice(0, 200);
+    const first = state.byId.get(comb.clips[0].padId) || {};
+    if (comb.sourceId && !asNew && state.byId.has(comb.sourceId)) {
+      enqueue({ type: 'reaudio', id: comb.sourceId, name, file: path, fields: { name, group, mix, original, size: bytes.length, start: 0, end: null }, files: [{ path, b64: bytesToB64(bytes) }] });
+      toast(`Updated “${name}”. Saving to the shared board…`);
+    } else {
+      enqueue({ type: 'add', pads: [cleanPad({ id: uid(), name, group, color: first.color | 0, file: path, original, size: bytes.length, start: 0, end: null, fadeIn: 0, fadeOut: 20, volume: 1, loop: false, retap: 'restart', order: maxOrder() + 1, addedBy: GH.login || null, mix })], files: [{ path, b64: bytesToB64(bytes) }] });
+      toast(`Added “${name}”. Saving to the shared board…`);
+    }
+    closeComb();
+  } catch (e) { toast('Couldn\'t save the combination: ' + ((e && e.message) || e) + '.', 6000); }
+  btns.forEach(b => { b.disabled = false; });
+}
+$('#combSave').addEventListener('click', () => saveComb(false));
+$('#combSaveNew').addEventListener('click', () => saveComb(true));
+
 /* ---------- settings ---------- */
 const pop = $('#pop');
 function openPop() {
@@ -1599,6 +1942,7 @@ function openEditor(id) {
   msg.hidden = !!buf;
   msg.textContent = buf ? '' : (err ? 'This sound isn\'t available: ' + err.message + '. You can still rename or delete it.' : 'Still downloading this sound. Close and reopen in a moment to trim it.');
   $$('#edWaveSec .tools button, #edWaveSec .trims button, #edWaveSec .trims input, #edWaveSec .splits button').forEach(b => { b.disabled = !buf; });
+  $('#edMix').hidden = !(Array.isArray(s.mix) && s.mix.length);
   $('#srcNote').textContent = s.builtin ? 'Starter sound, generated by the app itself. Trimming and splitting work the same as for your own files.'
     : `Original file: ${s.original || s.file}${s.size ? ' · ' + fmtBytes(s.size) : ''}${buf ? ' · ' + fmt(buf.duration) : ''}${s.addedBy ? ' · added by ' + s.addedBy : ''}. Trims, fades and splits only change how it plays; the file itself stays as it was.`;
   syncLabels(); syncTrim(); updatePlayBtn();
@@ -1883,7 +2227,7 @@ $('#sheet').addEventListener('click', e => { if (e.target === $('#sheet')) close
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (!$('#ask').hidden) return;
-  if (!$('#recSheet').hidden) closeRec(); else if (ed.open) closeEditor(); else if (!pop.hidden) closePop();
+  if (!$('#recSheet').hidden) closeRec(); else if (comb.open) closeComb(); else if (ed.open) closeEditor(); else if (!pop.hidden) closePop();
 });
 
 /* split at cursor */
@@ -1959,6 +2303,12 @@ $('#edDup').addEventListener('click', () => {
   enqueue({ type: 'add', pads: [cleanPad(Object.assign({}, ed.draft, { id: uid(), name: (ed.draft.name || 'Sound').slice(0, 54) + ' copy', order: orderAfter(ed.id)[0], added: new Date().toISOString(), addedBy: GH.login || null }))] });
   toast('Duplicated. The copy is right after this one.');
 });
+$('#edComb').addEventListener('click', () => {
+  const id = ed.id, s = state.byId.get(id);
+  if (s && JSON.stringify(fieldsOf(ed.draft)) !== JSON.stringify(fieldsOf(s))) enqueue(updateOp());
+  closeEditor(); openComb({ ids: [id] });
+});
+$('#edMix').addEventListener('click', () => { const id = ed.id; closeEditor(); openComb({ sourceId: id }); });
 function move(dir) {
   const list = visible(), i = list.findIndex(s => s.id === ed.id), j = i + dir;
   if (i < 0 || j < 0 || j >= list.length) { toast(dir < 0 ? 'Already first in this group.' : 'Already last in this group.'); return; }

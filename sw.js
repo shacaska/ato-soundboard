@@ -1,5 +1,5 @@
 // Keeps the app itself available offline. Sounds are stored by the app in IndexedDB, not here.
-const CACHE = 'ato-soundboard-v3';
+const CACHE = 'ato-soundboard-v4';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
