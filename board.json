@@ -220,6 +220,27 @@
           "fadeOut": 0
         }
       ]
+    },
+    {
+      "id": "d5ee0570966345b7",
+      "name": "GO BEYOND PLUS ULTRA! [4K]",
+      "group": "General",
+      "color": 1,
+      "file": "sounds/98759ab65e8f.mp3",
+      "builtin": null,
+      "original": "GO BEYOND PLUS ULTRA! [4K].mp3",
+      "size": 219755,
+      "start": 0,
+      "end": null,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "volume": 1,
+      "loop": false,
+      "retap": "restart",
+      "order": 14,
+      "added": "2026-10-22T05:46:17.847Z",
+      "addedBy": "shacaska",
+      "mix": null
     }
   ]
 }
