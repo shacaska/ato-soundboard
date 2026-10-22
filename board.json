@@ -100,6 +100,26 @@
       "order": 5,
       "added": "2026-10-22T03:52:54.337Z",
       "addedBy": "shacaska"
+    },
+    {
+      "id": "157bdfbb2de14b79",
+      "name": "13th muse prime copy",
+      "group": "General",
+      "color": 0,
+      "file": "sounds/cc6d199b28fa.mp3",
+      "builtin": null,
+      "original": "13th muse.mp3",
+      "size": 336192,
+      "start": 0,
+      "end": 3.8731,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "volume": 1,
+      "loop": false,
+      "retap": "restart",
+      "order": 1.25,
+      "added": "2026-10-22T03:55:25.623Z",
+      "addedBy": "shacaska"
     }
   ]
 }
