@@ -200,27 +200,6 @@
       "mix": null
     },
     {
-      "id": "7122aa394d454503",
-      "name": "Blue gokus roar hit different #ssj #ssjblue #goku #vegeta #d",
-      "group": "General",
-      "color": 1,
-      "file": "sounds/ed08b5e78903.mp3",
-      "builtin": null,
-      "original": "Blue gokus roar hit different #ssj #ssjblue #goku #vegeta #dragonball #dbz #anime.mp3",
-      "size": 212042,
-      "start": 0,
-      "end": 8.7539,
-      "fadeIn": 0,
-      "fadeOut": 0,
-      "volume": 1,
-      "loop": false,
-      "retap": "restart",
-      "order": 11,
-      "added": "2026-10-22T05:08:48.809Z",
-      "addedBy": "shacaska",
-      "mix": null
-    },
-    {
       "id": "e78ceffb385c451f",
       "name": "Zeus",
       "group": "General",
