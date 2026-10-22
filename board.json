@@ -43,7 +43,7 @@
     },
     {
       "id": "a245dcc9659f44d3",
-      "name": "Fear and hunger Black Witch laugh SFX",
+      "name": "Cackle",
       "group": "General",
       "color": 2,
       "file": "sounds/d7bd6c5e898f.mp3",
@@ -51,7 +51,7 @@
       "original": "Fear and hunger Black Witch laugh SFX.mp3",
       "size": 33289,
       "start": 0,
-      "end": null,
+      "end": 2.9489,
       "fadeIn": 0,
       "fadeOut": 0,
       "volume": 1,
