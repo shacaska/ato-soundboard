@@ -179,27 +179,6 @@
       "mix": null
     },
     {
-      "id": "b1eb570ee93540c4",
-      "name": "Ultra Instinct Theme (Official Version)",
-      "group": "General",
-      "color": 0,
-      "file": "sounds/d20f10328b3d.mp3",
-      "builtin": null,
-      "original": "Ultra Instinct Theme (Official Version).mp3",
-      "size": 4012545,
-      "start": 0,
-      "end": null,
-      "fadeIn": 0,
-      "fadeOut": 0,
-      "volume": 1,
-      "loop": false,
-      "retap": "restart",
-      "order": 10,
-      "added": "2026-10-22T05:08:46.092Z",
-      "addedBy": "shacaska",
-      "mix": null
-    },
-    {
       "id": "e78ceffb385c451f",
       "name": "Zeus",
       "group": "General",
