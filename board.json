@@ -80,6 +80,26 @@
       "order": 1.5,
       "added": "2026-10-22T03:23:05.107Z",
       "addedBy": "shacaska"
+    },
+    {
+      "id": "47088a9411a04092",
+      "name": "Slow low pitched cha #4 – 1792640274125",
+      "group": "General",
+      "color": 4,
+      "file": "sounds/0cd0d74600b8.mp3",
+      "builtin": null,
+      "original": "Slow_low_pitched_cha_#4-1792640274125.mp3",
+      "size": 410157,
+      "start": 0,
+      "end": null,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "volume": 1,
+      "loop": false,
+      "retap": "restart",
+      "order": 4,
+      "added": "2026-10-22T03:38:11.135Z",
+      "addedBy": "shacaska"
     }
   ]
 }
