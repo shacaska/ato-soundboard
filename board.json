@@ -241,6 +241,27 @@
       "added": "2026-10-22T05:46:17.847Z",
       "addedBy": "shacaska",
       "mix": null
+    },
+    {
+      "id": "ada80964f53046a3",
+      "name": "All Might vs Noumu (Brainless) Theme – My Hero Academia OST",
+      "group": "General",
+      "color": 2,
+      "file": "sounds/6c6a44ee0035.mp3",
+      "builtin": null,
+      "original": "All Might vs Noumu (Brainless) Theme - My Hero Academia OST [Plus Ultra!].mp3",
+      "size": 4707820,
+      "start": 0,
+      "end": null,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "volume": 1,
+      "loop": false,
+      "retap": "restart",
+      "order": 15,
+      "added": "2026-10-22T05:46:20.739Z",
+      "addedBy": "shacaska",
+      "mix": null
     }
   ]
 }
