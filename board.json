@@ -260,6 +260,27 @@
           "trimEnd": 4.49
         }
       ]
+    },
+    {
+      "id": "310b29fac5be40ea",
+      "name": "This world shall know pain Almighty Push English DUB Naruto",
+      "group": "General",
+      "color": 2,
+      "file": "sounds/faf19ce8ab11.mp3",
+      "builtin": null,
+      "original": "This world shall know pain Almighty Push English DUB Naruto best moments.mp3",
+      "size": 907317,
+      "start": 0,
+      "end": null,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "volume": 1,
+      "loop": false,
+      "retap": "restart",
+      "order": 17,
+      "added": "2026-10-22T05:57:55.693Z",
+      "addedBy": "shacaska",
+      "mix": null
     }
   ]
 }
