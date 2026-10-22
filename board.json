@@ -240,6 +240,49 @@
       "added": "2026-10-22T05:08:51.632Z",
       "addedBy": "shacaska",
       "mix": null
+    },
+    {
+      "id": "9e218c05f43f40ee",
+      "name": "Zeus + Blue gokus roar hit different #ssj #ssjblue #goku #ve",
+      "group": "General",
+      "color": 2,
+      "file": "sounds/825da6439534.wav",
+      "builtin": null,
+      "original": "Combined from Zeus, Blue gokus roar hit different #ssj #ssjblue #goku #vegeta #d, Ultra Instinct Theme (Official Version)",
+      "size": 16042988,
+      "start": 0,
+      "end": null,
+      "fadeIn": 0,
+      "fadeOut": 20,
+      "volume": 1,
+      "loop": false,
+      "retap": "restart",
+      "order": 13,
+      "added": "2026-10-22T05:19:58.479Z",
+      "addedBy": "shacaska",
+      "mix": [
+        {
+          "id": "e78ceffb385c451f",
+          "offset": 0,
+          "gain": 1,
+          "fadeIn": 0.49,
+          "fadeOut": 0
+        },
+        {
+          "id": "7122aa394d454503",
+          "offset": 0,
+          "gain": 1,
+          "fadeIn": 1.65,
+          "fadeOut": 0.95
+        },
+        {
+          "id": "b1eb570ee93540c4",
+          "offset": 0,
+          "gain": 1,
+          "fadeIn": 0,
+          "fadeOut": 0
+        }
+      ]
     }
   ]
 }
