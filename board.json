@@ -283,27 +283,6 @@
       "mix": null
     },
     {
-      "id": "3536b932857d4e14",
-      "name": "Dark Souls Remastered – Ringing the Bell",
-      "group": "General",
-      "color": 3,
-      "file": "sounds/250bfb00385e.mp3",
-      "builtin": null,
-      "original": "Dark Souls Remastered - Ringing the Bell.mp3",
-      "size": 214783,
-      "start": 0,
-      "end": null,
-      "fadeIn": 0,
-      "fadeOut": 0,
-      "volume": 1,
-      "loop": false,
-      "retap": "restart",
-      "order": 18,
-      "added": "2026-10-22T05:59:40.915Z",
-      "addedBy": "shacaska",
-      "mix": null
-    },
-    {
       "id": "fac9d69325f84fd6",
       "name": "Party wipe",
       "group": "General",
