@@ -40,6 +40,26 @@
       "order": 2,
       "added": "2026-10-20T00:44:00.155Z",
       "addedBy": "shacaska"
+    },
+    {
+      "id": "a245dcc9659f44d3",
+      "name": "Fear and hunger Black Witch laugh SFX",
+      "group": "General",
+      "color": 2,
+      "file": "sounds/d7bd6c5e898f.mp3",
+      "builtin": null,
+      "original": "Fear and hunger Black Witch laugh SFX.mp3",
+      "size": 33289,
+      "start": 0,
+      "end": null,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "volume": 1,
+      "loop": false,
+      "retap": "restart",
+      "order": 3,
+      "added": "2026-10-22T03:22:16.888Z",
+      "addedBy": "shacaska"
     }
   ]
 }
