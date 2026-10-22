@@ -65,7 +65,7 @@
     {
       "id": "2eb5c48bec8649fa",
       "name": "13th muse Fire",
-      "group": "General",
+      "group": "Battle",
       "color": 0,
       "file": "sounds/cc6d199b28fa.mp3",
       "builtin": null,
@@ -80,7 +80,8 @@
       "retap": "restart",
       "order": 1.5,
       "added": "2026-10-22T03:23:05.107Z",
-      "addedBy": "shacaska"
+      "addedBy": "shacaska",
+      "mix": null
     },
     {
       "id": "d6f43ccc1e8b46af",
