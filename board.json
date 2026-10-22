@@ -264,7 +264,7 @@
     {
       "id": "fac9d69325f84fd6",
       "name": "Party wipe",
-      "group": "General",
+      "group": "Battle",
       "color": 2,
       "file": "sounds/edbb04f41eb7.wav",
       "builtin": null,
