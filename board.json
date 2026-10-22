@@ -3,7 +3,7 @@
   "pads": [
     {
       "id": "acc7895604a94483",
-      "name": "13th muse",
+      "name": "13th muse prime",
       "group": "General",
       "color": 0,
       "file": "sounds/cc6d199b28fa.mp3",
@@ -11,7 +11,7 @@
       "original": "13th muse.mp3",
       "size": 336192,
       "start": 0,
-      "end": null,
+      "end": 4.0854,
       "fadeIn": 0,
       "fadeOut": 0,
       "volume": 1,
@@ -59,6 +59,26 @@
       "retap": "restart",
       "order": 3,
       "added": "2026-10-22T03:22:16.888Z",
+      "addedBy": "shacaska"
+    },
+    {
+      "id": "2eb5c48bec8649fa",
+      "name": "13th muse prime 2",
+      "group": "General",
+      "color": 0,
+      "file": "sounds/cc6d199b28fa.mp3",
+      "builtin": null,
+      "original": "13th muse.mp3",
+      "size": 336192,
+      "start": 4.0854,
+      "end": 11.5593,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "volume": 1,
+      "loop": false,
+      "retap": "restart",
+      "order": 1.5,
+      "added": "2026-10-22T03:23:05.107Z",
       "addedBy": "shacaska"
     }
   ]
