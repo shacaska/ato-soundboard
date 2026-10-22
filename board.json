@@ -179,27 +179,6 @@
       "mix": null
     },
     {
-      "id": "e78ceffb385c451f",
-      "name": "Zeus",
-      "group": "General",
-      "color": 2,
-      "file": "sounds/a5b0477643f6.mp3",
-      "builtin": null,
-      "original": "Kratos screaming “Zeus” compilation.mp3",
-      "size": 653901,
-      "start": 14.717,
-      "end": 16.3468,
-      "fadeIn": 0,
-      "fadeOut": 0,
-      "volume": 1,
-      "loop": false,
-      "retap": "restart",
-      "order": 12,
-      "added": "2026-10-22T05:08:51.632Z",
-      "addedBy": "shacaska",
-      "mix": null
-    },
-    {
       "id": "9e218c05f43f40ee",
       "name": "Awakening",
       "group": "Battle",
