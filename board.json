@@ -262,6 +262,46 @@
       "added": "2026-10-22T05:46:20.739Z",
       "addedBy": "shacaska",
       "mix": null
+    },
+    {
+      "id": "e69b1e9853fe4adb",
+      "name": "GO BEYOND PLUS ULTRA!",
+      "group": "General",
+      "color": 1,
+      "file": "sounds/19a97f0758eb.wav",
+      "builtin": null,
+      "original": "Combined from GO BEYOND PLUS ULTRA! [4K], All Might vs Noumu (Brainless) Theme – My Hero Academia OST",
+      "size": 10064396,
+      "start": 0,
+      "end": null,
+      "fadeIn": 0,
+      "fadeOut": 20,
+      "volume": 1,
+      "loop": false,
+      "retap": "restart",
+      "order": 16,
+      "added": "2026-10-22T05:55:41.957Z",
+      "addedBy": "shacaska",
+      "mix": [
+        {
+          "id": "d5ee0570966345b7",
+          "offset": 0,
+          "gain": 2,
+          "fadeIn": 0,
+          "fadeOut": 0.5,
+          "trimStart": 8.815,
+          "trimEnd": 0
+        },
+        {
+          "id": "ada80964f53046a3",
+          "offset": 6.77,
+          "gain": 0.39,
+          "fadeIn": 2.35,
+          "fadeOut": 0,
+          "trimStart": 145.954,
+          "trimEnd": 4.49
+        }
+      ]
     }
   ]
 }
