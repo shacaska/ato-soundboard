@@ -4,7 +4,7 @@
     {
       "id": "acc7895604a94483",
       "name": "13th muse prime success",
-      "group": "General",
+      "group": "Battle",
       "color": 0,
       "file": "sounds/cc6d199b28fa.mp3",
       "builtin": null,
@@ -19,7 +19,8 @@
       "retap": "restart",
       "order": 1,
       "added": "2026-10-20T00:41:58.688Z",
-      "addedBy": "shacaska"
+      "addedBy": "shacaska",
+      "mix": null
     },
     {
       "id": "1051dbbb52fe4025",
