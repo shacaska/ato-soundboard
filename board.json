@@ -302,6 +302,46 @@
       "added": "2026-10-22T05:59:40.915Z",
       "addedBy": "shacaska",
       "mix": null
+    },
+    {
+      "id": "fac9d69325f84fd6",
+      "name": "This world shall know pain Almighty Push English DUB Naruto",
+      "group": "General",
+      "color": 2,
+      "file": "sounds/edbb04f41eb7.wav",
+      "builtin": null,
+      "original": "Combined from This world shall know pain Almighty Push English DUB Naruto, Dark Souls Remastered – Ringing the Bell",
+      "size": 2168244,
+      "start": 0,
+      "end": null,
+      "fadeIn": 0,
+      "fadeOut": 20,
+      "volume": 1,
+      "loop": false,
+      "retap": "restart",
+      "order": 19,
+      "added": "2026-10-22T06:03:34.870Z",
+      "addedBy": "shacaska",
+      "mix": [
+        {
+          "id": "310b29fac5be40ea",
+          "offset": 0,
+          "gain": 1,
+          "fadeIn": 0,
+          "fadeOut": 0.95,
+          "trimStart": 0.577,
+          "trimEnd": 1.097
+        },
+        {
+          "id": "3536b932857d4e14",
+          "offset": 2.561,
+          "gain": 0.6,
+          "fadeIn": 1.95,
+          "fadeOut": 3.25,
+          "trimStart": 0,
+          "trimEnd": 8.869
+        }
+      ]
     }
   ]
 }
