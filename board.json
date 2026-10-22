@@ -133,6 +133,27 @@
       "added": "2026-10-22T04:39:57.503Z",
       "addedBy": "shacaska",
       "mix": null
+    },
+    {
+      "id": "5bee6d7ceb194010",
+      "name": "Ultra Heavy Laser sound effect",
+      "group": "General",
+      "color": 6,
+      "file": "sounds/7474bff8705c.mp3",
+      "builtin": null,
+      "original": "Ultra Heavy Laser sound effect.mp3",
+      "size": 521750,
+      "start": 0,
+      "end": null,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "volume": 1,
+      "loop": false,
+      "retap": "restart",
+      "order": 8,
+      "added": "2026-10-22T04:40:07.935Z",
+      "addedBy": "shacaska",
+      "mix": null
     }
   ]
 }
