@@ -305,7 +305,7 @@
     },
     {
       "id": "fac9d69325f84fd6",
-      "name": "This world shall know pain Almighty Push English DUB Naruto",
+      "name": "Party wipe",
       "group": "General",
       "color": 2,
       "file": "sounds/edbb04f41eb7.wav",
@@ -313,7 +313,7 @@
       "original": "Combined from This world shall know pain Almighty Push English DUB Naruto, Dark Souls Remastered – Ringing the Bell",
       "size": 2168244,
       "start": 0,
-      "end": null,
+      "end": 11.2927,
       "fadeIn": 0,
       "fadeOut": 20,
       "volume": 1,
