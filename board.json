@@ -120,6 +120,38 @@
       "order": 1.25,
       "added": "2026-10-22T03:55:25.623Z",
       "addedBy": "shacaska"
+    },
+    {
+      "id": "d6f43ccc1e8b46af",
+      "name": "13th Muse Prime Fail",
+      "group": "General",
+      "color": 0,
+      "file": "sounds/588233be772f.wav",
+      "builtin": null,
+      "original": "Combined from 13th muse prime copy, Prime Fail",
+      "size": 1586444,
+      "start": 0,
+      "end": null,
+      "fadeIn": 0,
+      "fadeOut": 20,
+      "volume": 1,
+      "loop": false,
+      "retap": "restart",
+      "order": 6,
+      "added": "2026-10-22T04:37:02.579Z",
+      "addedBy": "shacaska",
+      "mix": [
+        {
+          "id": "157bdfbb2de14b79",
+          "offset": 0,
+          "gain": 1
+        },
+        {
+          "id": "5e39069059dc4bc7",
+          "offset": 3.056,
+          "gain": 1
+        }
+      ]
     }
   ]
 }
