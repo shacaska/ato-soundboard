@@ -226,6 +226,7 @@ main{padding-block:14px calc(104px + env(safe-area-inset-bottom,0px))}
 .fade-t[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--ground)}
 .fade input{width:64px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--panel);padding:0 6px;font-size:15px;font-variant-numeric:tabular-nums}
 .fade input:disabled{opacity:.4}
+.cl-trim{margin-right:6px}
 .cl-row.sel{border-color:var(--bronze)}
 .cl-row .dot{width:12px;height:12px;border-radius:50%;background:var(--c)}
 .cl-row .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -437,7 +438,7 @@ main{padding-block:14px calc(104px + env(safe-area-inset-bottom,0px))}
       <button class="btn primary" id="combSave">Add to board</button>
     </div>
     <div class="sheet-body">
-      <p class="note">Pick sounds from your board, then line them up one after another or stack them so they play together. Drag a sound along the timeline to change when it starts.</p>
+      <p class="note">Pick sounds from your board, then line them up one after another or stack them so they play together. Drag a sound along the timeline to change when it starts. Tap a sound, then drag its left or right edge to trim it.</p>
       <div class="cl-add">
         <select id="combPick" aria-label="Sound to add"></select>
         <button class="btn sm primary" id="combAdd"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add</button>
@@ -1153,7 +1154,7 @@ function cleanPad(d) {
     order: +d.order || 0,
     added: d.added || new Date().toISOString(),
     addedBy: d.addedBy || null,
-    mix: Array.isArray(d.mix) && d.mix.length ? d.mix.slice(0, 40).map(m => ({ id: String(m.id), offset: +(+m.offset || 0).toFixed(4), gain: +clamp(m.gain == null ? 1 : +m.gain, 0, 2).toFixed(3), fadeIn: +clamp(+m.fadeIn || 0, 0, 600).toFixed(3), fadeOut: +clamp(+m.fadeOut || 0, 0, 600).toFixed(3) })) : null
+    mix: Array.isArray(d.mix) && d.mix.length ? d.mix.slice(0, 40).map(m => ({ id: String(m.id), offset: +(+m.offset || 0).toFixed(4), gain: +clamp(m.gain == null ? 1 : +m.gain, 0, 2).toFixed(3), fadeIn: +clamp(+m.fadeIn || 0, 0, 600).toFixed(3), fadeOut: +clamp(+m.fadeOut || 0, 0, 600).toFixed(3), trimStart: +clamp(+m.trimStart || 0, 0, 600).toFixed(3), trimEnd: +clamp(+m.trimEnd || 0, 0, 600).toFixed(3) })) : null
   };
 }
 function fieldsOf(d) { const c = cleanPad(d); delete c.id; delete c.file; delete c.builtin; return c; }
@@ -1574,7 +1575,15 @@ function padLen(p) {
   const s = clamp(+p.start || 0, 0, b.duration), e = clamp(p.end == null ? b.duration : +p.end, s, b.duration);
   return e - s;
 }
-function combEnd() { let end = 0; for (const c of comb.clips) { const p = state.byId.get(c.padId); if (p) end = Math.max(end, c.offset + padLen(p)); } return end; }
+// the part of a pad a clip plays: the pad's own trim, minus this clip's extra trim at each end
+function clipRange(c) {
+  const p = state.byId.get(c.padId), b = p && bufFor(p); if (!b) return null;
+  const s0 = clamp(+p.start || 0, 0, b.duration), e0 = clamp(p.end == null ? b.duration : +p.end, s0, b.duration), full = e0 - s0;
+  const ts = clamp(+c.ts || 0, 0, Math.max(0, full - MIN_CLIP)), te = clamp(+c.te || 0, 0, Math.max(0, full - ts - MIN_CLIP));
+  return { p, b, s: s0 + ts, e: e0 - te, full, ts, te };
+}
+function clipLen(c) { const r = clipRange(c); return r ? r.e - r.s : 0; }
+function combEnd() { let end = 0; for (const c of comb.clips) end = Math.max(end, c.offset + clipLen(c)); return end; }
 function openComb(o) {
   if (!canEdit()) return;
   closePop();
@@ -1588,7 +1597,7 @@ function openComb(o) {
       for (const m of src.mix) {
         const mp = state.byId.get(m.id); if (!mp) { missing++; continue; }
         const dflt = +Math.max(0.05, Math.min(0.5, padLen(mp) * 0.3)).toFixed(2), fi = Math.max(0, +m.fadeIn || 0), fo = Math.max(0, +m.fadeOut || 0);
-        comb.clips.push({ k: uid(), padId: m.id, offset: Math.max(0, +m.offset || 0), gain: m.gain == null ? 1 : +m.gain, fi, fo, fiLen: fi || dflt, foLen: fo || dflt });
+        comb.clips.push({ k: uid(), padId: m.id, offset: Math.max(0, +m.offset || 0), gain: m.gain == null ? 1 : +m.gain, fi, fo, fiLen: fi || dflt, foLen: fo || dflt, ts: Math.max(0, +m.trimStart || 0), te: Math.max(0, +m.trimEnd || 0) });
       }
       if (missing) toast(`${missing} of the sounds in this combination ${missing === 1 ? 'has' : 'have'} been deleted, so ${missing === 1 ? 'it\'s' : 'they\'re'} left out.`, 6000);
     }
@@ -1623,7 +1632,7 @@ function addClip(id, quiet) {
   const gap = +$('#combGap').value || 0;
   const offset = comb.mode === 'stack' || !comb.clips.length ? 0 : Math.max(0, combEnd() + gap);
   const dflt = +Math.max(0.05, Math.min(0.5, padLen(p) * 0.3)).toFixed(2);
-  const c = { k: uid(), padId: id, offset: +offset.toFixed(3), gain: 1, fi: 0, fo: 0, fiLen: dflt, foLen: dflt };
+  const c = { k: uid(), padId: id, offset: +offset.toFixed(3), gain: 1, fi: 0, fo: 0, fiLen: dflt, foLen: dflt, ts: 0, te: 0 };
   comb.clips.push(c); comb.sel = c.k; comb.cache = null;
   if (!quiet) { autoName(); renderCombList(); fitComb(); drawComb(); }
 }
@@ -1643,7 +1652,7 @@ function arrange() {
   if (comb.mode === 'stack') comb.clips.forEach(c => { c.offset = 0; });
   else if (comb.mode === 'line') {
     const gap = +$('#combGap').value || 0; let t = 0;
-    comb.clips.forEach((c, i) => { const p = state.byId.get(c.padId); c.offset = +Math.max(0, i ? t + gap : 0).toFixed(3); t = c.offset + (p ? padLen(p) : 0); });
+    comb.clips.forEach((c, i) => { c.offset = +Math.max(0, i ? t + gap : 0).toFixed(3); t = c.offset + clipLen(c); });
   }
   comb.cache = null;
 }
@@ -1657,7 +1666,8 @@ function renderCombList() {
       <label class="cl-f cl-offf">Starts at <input type="number" class="cl-off" step="0.05" min="0" inputmode="decimal" value="${c.offset.toFixed(2)}"> s</label>
       <label class="cl-f cl-volf">Volume <input type="range" class="cl-vol" min="0" max="200" step="1" value="${Math.round(c.gain * 100)}"><output>${Math.round(c.gain * 100)}%</output></label>
       <button class="btn sm icon cl-x" aria-label="Remove ${esc(p.name)}">${ICON_X}</button>
-      <div class="cl-fades">${['in', 'out'].map(w => { const on = w === 'in' ? c.fi > 0 : c.fo > 0, len = w === 'in' ? c.fiLen : c.foLen;
+      <div class="cl-fades">${(() => { const r = clipRange(c); if (!r) return '';
+        return `<span class="fade cl-trim">Plays <input type="number" class="cl-ts" step="0.05" min="0" inputmode="decimal" value="${r.ts.toFixed(2)}" aria-label="Start playing at, in seconds"> to <input type="number" class="cl-te" step="0.05" min="0" inputmode="decimal" value="${(r.full - r.te).toFixed(2)}" aria-label="Stop playing at, in seconds"> of ${r.full.toFixed(2)} s</span>`; })()}${['in', 'out'].map(w => { const on = w === 'in' ? c.fi > 0 : c.fo > 0, len = w === 'in' ? c.fiLen : c.foLen;
         return `<span class="fade"><button class="fade-t" data-w="${w}" aria-pressed="${on}">${w === 'in' ? FADE_IN_ICON : FADE_OUT_ICON}Fade ${w}</button><input type="number" class="fade-len" data-w="${w}" step="0.1" min="0.05" inputmode="decimal" value="${len.toFixed(2)}" aria-label="Fade ${w} length in seconds"${on ? '' : ' disabled'}> s</span>`; }).join('')}</div></div>`;
   }).join('');
   const end = combEnd();
@@ -1694,11 +1704,11 @@ function drawComb() {
   }
   comb.clips.forEach((c, i) => {
     const p = state.byId.get(c.padId); if (!p) return;
-    const buf = bufFor(p), y = (RULER + i * LANE + 4) * dpr, h = (LANE - 8) * dpr;
-    const len = padLen(p), x = c.offset * pps, w = Math.max(3 * dpr, len * pps);
+    const rg = clipRange(c), buf = rg ? rg.b : null, y = (RULER + i * LANE + 4) * dpr, h = (LANE - 8) * dpr;
+    const len = clipLen(c), x = c.offset * pps, w = Math.max(3 * dpr, len * pps);
     const col = TOK['p' + ((p.color | 0) % COLOR_N)] || TOK.bronze;
     g.globalAlpha = 0.28; g.fillStyle = col; rr(g, x, y, w, h, 5 * dpr); g.fill(); g.globalAlpha = 1;
-    if (buf) { const s = clamp(+p.start || 0, 0, buf.duration); g.save(); rr(g, x, y, w, h, 5 * dpr); g.clip(); drawMini(g, p, buf, s, s + len, x, y, w, h, col); g.restore(); }
+    if (buf) { g.save(); rr(g, x, y, w, h, 5 * dpr); g.clip(); drawMini(g, p, buf, rg.s, rg.e, x, y, w, h, col); g.restore(); }
     if (c.fi > 0 || c.fo > 0) {
       let fi = c.fi, fo = c.fo; if (fi + fo > len && len > 0) { const k = len / (fi + fo); fi *= k; fo *= k; }
       const xi = x + fi * pps, xo = x + w - fo * pps;
@@ -1715,21 +1725,32 @@ function drawComb() {
     g.save(); rr(g, x, y, w, h, 5 * dpr); g.clip();
     g.fillStyle = TOK.ink; g.font = `600 ${13 * dpr}px ${FONT}`; g.textBaseline = 'top'; g.fillText(p.name, x + 7 * dpr, y + 5 * dpr);
     g.restore();
+    if (c.k === comb.sel && w > 16 * dpr) {
+      // grips on both edges: drag them to trim
+      g.fillStyle = TOK.ink;
+      for (const gx of [x + 3 * dpr, x + w - 7 * dpr]) { rr(g, gx, y + h * 0.28, 4 * dpr, h * 0.44, 2 * dpr); g.fill(); }
+    }
   });
   if (comb.preview && voices.has(comb.preview)) { const xp = voicePos(comb.preview) * pps; g.fillStyle = TOK.bronze; g.fillRect(xp - dpr, 0, 2 * dpr, H); }
 }
 function clipAt(xCss, yCss) {
   const w = combCv.getBoundingClientRect().width || 1, pps = w / comb.span, lane = Math.floor((yCss - RULER) / LANE);
   const c = comb.clips[lane]; if (!c) return null;
-  const p = state.byId.get(c.padId), x0 = c.offset * pps, x1 = x0 + Math.max(6, padLen(p) * pps);
-  return xCss >= x0 - 6 && xCss <= x1 + 6 ? c : null;
+  const x0 = c.offset * pps, bw = Math.max(6, clipLen(c) * pps), x1 = x0 + bw;
+  if (xCss < x0 - 10 || xCss > x1 + 10) return null;
+  const edge = Math.min(20, bw * 0.3);
+  const part = xCss <= x0 + edge ? 'trimL' : xCss >= x1 - edge ? 'trimR' : 'move';
+  return { c, part };
 }
 combCv.addEventListener('pointerdown', e => {
-  const r = combCv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, c = clipAt(x, y);
-  if (!c) { if (comb.sel) { comb.sel = null; renderCombList(); drawComb(); } return; }
+  const r = combCv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, hit = clipAt(x, y);
+  if (!hit) { if (comb.sel) { comb.sel = null; renderCombList(); drawComb(); } return; }
+  const c = hit.c;
   e.preventDefault();
   try { combCv.setPointerCapture(e.pointerId); } catch (err) {}
-  comb.sel = c.k; comb.drag = { k: c.k, x0: x, off0: c.offset, pid: e.pointerId, moved: false };
+  // edges only trim once the clip is selected, so a first touch never cuts by accident
+  const part = comb.sel === c.k ? hit.part : 'move';
+  comb.sel = c.k; comb.drag = { k: c.k, part, x0: x, off0: c.offset, ts0: +c.ts || 0, te0: +c.te || 0, pid: e.pointerId, moved: false };
   renderCombList(); drawComb();
 });
 combCv.addEventListener('pointermove', e => {
@@ -1737,10 +1758,21 @@ combCv.addEventListener('pointermove', e => {
   const r = combCv.getBoundingClientRect(), x = e.clientX - r.left, pps = (r.width || 1) / comb.span;
   if (!d.moved && Math.abs(x - d.x0) < 4) return;
   d.moved = true;
-  const c = comb.clips.find(q => q.k === d.k), p = state.byId.get(c.padId), len = padLen(p);
-  let off = Math.max(0, d.off0 + (x - d.x0) / pps);
+  const c = comb.clips.find(q => q.k === d.k), rg = clipRange(c); if (!rg) return;
+  const dt = (x - d.x0) / pps;
+  if (d.part === 'trimL' || d.part === 'trimR') {
+    if (d.part === 'trimL') {
+      let ts = clamp(d.ts0 + dt, 0, rg.full - d.te0 - MIN_CLIP);
+      if (comb.mode === 'free') { ts = Math.max(ts, d.ts0 - d.off0); c.offset = +Math.max(0, d.off0 + (ts - d.ts0)).toFixed(3); }
+      c.ts = +ts.toFixed(3);
+    } else c.te = +clamp(d.te0 - dt, 0, rg.full - d.ts0 - MIN_CLIP).toFixed(3);
+    if (comb.mode !== 'free') arrange();
+    comb.cache = null; syncRows(); drawComb(); return;
+  }
+  const len = clipLen(c);
+  let off = Math.max(0, d.off0 + dt);
   // snap the start or end to 0 and to the edges of the other sounds
-  const marks = [0]; for (const o of comb.clips) if (o !== c) { const op = state.byId.get(o.padId); marks.push(o.offset, o.offset + padLen(op)); }
+  const marks = [0]; for (const o of comb.clips) if (o !== c) marks.push(o.offset, o.offset + clipLen(o));
   let best = null;
   for (const m of marks) { for (const cand of [m, m - len]) { if (cand < 0) continue; const dx = Math.abs((cand - off) * pps); if (dx < 10 && (!best || dx < best.dx)) best = { dx, v: cand }; } }
   if (best) off = best.v;
@@ -1749,6 +1781,16 @@ combCv.addEventListener('pointermove', e => {
   const row = $(`#combList .cl-row[data-k="${c.k}"] .cl-off`); if (row) row.value = c.offset.toFixed(2);
   drawComb();
 });
+function syncRows() {
+  for (const c of comb.clips) {
+    const row = $(`#combList .cl-row[data-k="${c.k}"]`); if (!row) continue;
+    const r = clipRange(c), off = row.querySelector('.cl-off'), a = row.querySelector('.cl-ts'), b = row.querySelector('.cl-te');
+    if (off && document.activeElement !== off) off.value = c.offset.toFixed(2);
+    if (r && a && document.activeElement !== a) a.value = r.ts.toFixed(2);
+    if (r && b && document.activeElement !== b) b.value = (r.full - r.te).toFixed(2);
+  }
+  $('#combInfo').textContent = comb.clips.length ? `${comb.clips.length} sound${comb.clips.length > 1 ? 's' : ''} · ${fmt(combEnd())} long` : 'Add a sound to start.';
+}
 function combUp(e) {
   const d = comb.drag; if (!d || e.pointerId !== d.pid) return;
   comb.drag = null;
@@ -1761,14 +1803,21 @@ $('#combList').addEventListener('input', e => {
   const c = comb.clips.find(q => q.k === row.dataset.k); if (!c) return;
   if (e.target.classList.contains('cl-vol')) { c.gain = e.target.value / 100; row.querySelector('output').textContent = e.target.value + '%'; comb.cache = null; }
   if (e.target.classList.contains('cl-off')) { const v = parseFloat(e.target.value); if (isFinite(v)) { c.offset = clamp(v, 0, 600); comb.cache = null; if (comb.mode !== 'free') setMode('free', true); drawComb(); } }
+  if (e.target.classList.contains('cl-ts') || e.target.classList.contains('cl-te')) {
+    const v = parseFloat(e.target.value), r = clipRange(c); if (!isFinite(v) || !r) return;
+    if (e.target.classList.contains('cl-ts')) c.ts = +clamp(v, 0, r.full - r.te - MIN_CLIP).toFixed(3);
+    else c.te = +clamp(r.full - v, 0, r.full - r.ts - MIN_CLIP).toFixed(3);
+    if (comb.mode !== 'free') arrange();
+    comb.cache = null; syncRows(); drawComb(); return;
+  }
   if (e.target.classList.contains('fade-len')) {
-    const v = parseFloat(e.target.value), p = state.byId.get(c.padId); if (!isFinite(v) || v <= 0) return;
-    const len = Math.max(0.05, Math.min(clamp(v, 0.05, 600), padLen(p) || v));
+    const v = parseFloat(e.target.value); if (!isFinite(v) || v <= 0) return;
+    const len = Math.max(0.05, Math.min(clamp(v, 0.05, 600), clipLen(c) || v));
     if (e.target.dataset.w === 'in') { c.fiLen = len; if (c.fi > 0) c.fi = len; } else { c.foLen = len; if (c.fo > 0) c.fo = len; }
     comb.cache = null; drawComb();
   }
 });
-$('#combList').addEventListener('change', e => { if (e.target.classList.contains('cl-off')) { fitComb(); renderCombList(); drawComb(); } });
+$('#combList').addEventListener('change', e => { if (e.target.matches('.cl-off, .cl-ts, .cl-te')) { fitComb(); renderCombList(); drawComb(); } });
 $('#combList').addEventListener('click', e => {
   const row = e.target.closest('.cl-row'); if (!row) return;
   const ft = e.target.closest('.fade-t');
@@ -1800,13 +1849,13 @@ $('#combCancel').addEventListener('click', closeComb);
 window.addEventListener('resize', () => { if (comb.open) { fitComb(); drawComb(); } });
 
 async function renderMix() {
-  const sig = JSON.stringify(comb.clips.map(c => { const p = state.byId.get(c.padId) || {}; return [c.padId, c.offset, c.gain, c.fi, c.fo, p.start, p.end, p.volume, p.fadeIn, p.fadeOut, p.file || p.builtin]; }));
+  const sig = JSON.stringify(comb.clips.map(c => { const p = state.byId.get(c.padId) || {}; return [c.padId, c.offset, c.gain, c.fi, c.fo, c.ts, c.te, p.start, p.end, p.volume, p.fadeIn, p.fadeOut, p.file || p.builtin]; }));
   if (comb.cache && comb.cache.sig === sig) return comb.cache;
   const sr = getCtx().sampleRate, items = []; let end = 0;
   for (const c of comb.clips) {
     const p = state.byId.get(c.padId); if (!p) continue;
-    const buf = bufFor(p); if (!buf) throw new Error(`“${p.name}” hasn't downloaded yet`);
-    const s = clamp(+p.start || 0, 0, buf.duration), e = clamp(p.end == null ? buf.duration : +p.end, s, buf.duration);
+    const rg = clipRange(c); if (!rg) throw new Error(`“${p.name}” hasn't downloaded yet`);
+    const buf = rg.b, s = rg.s, e = rg.e;
     if (e - s < 0.005) continue;
     items.push({ p, buf, s, dur: e - s, off: Math.max(0, +c.offset || 0), vol: clamp((p.volume == null ? 1 : +p.volume) * c.gain, 0, 4), fi: c.fi > 0 ? c.fi : (+p.fadeIn || 0) / 1000, fo: c.fo > 0 ? c.fo : (+p.fadeOut || 0) / 1000 });
     end = Math.max(end, c.offset + e - s);
@@ -1856,7 +1905,7 @@ async function saveComb(asNew) {
     const names = comb.clips.map(c => (state.byId.get(c.padId) || {}).name).filter(Boolean);
     const name = $('#combName').value.trim() || names.join(' + ').slice(0, 60) || 'Combination';
     const group = $('#combGroup').value.trim() || 'General';
-    const mix = comb.clips.map(c => ({ id: c.padId, offset: c.offset, gain: c.gain, fadeIn: c.fi, fadeOut: c.fo }));
+    const mix = comb.clips.map(c => ({ id: c.padId, offset: c.offset, gain: c.gain, fadeIn: c.fi, fadeOut: c.fo, trimStart: +c.ts || 0, trimEnd: +c.te || 0 }));
     const original = ('Combined from ' + names.join(', ')).slice(0, 200);
     const first = state.byId.get(comb.clips[0].padId) || {};
     if (comb.sourceId && !asNew && state.byId.has(comb.sourceId)) {

@@ -27,7 +27,7 @@ The key is saved only on the device where it was pasted. When it expires, the ap
 
 - **Add sounds** takes audio files (MP3, M4A, WAV, AIFF, FLAC) and videos (MOV, MP4, M4V, WebM) from Files or Photos. For a video, only its sound is kept, saved as a WAV file; the video itself isn't uploaded. If the iPad can't read a video's sound directly, the app plays the video once with the volume off to capture it, which takes as long as the clip (videos up to 3 minutes).
 - **Record** uses the microphone, up to 2 minutes per take. Quiet bits at the start and end are trimmed off automatically, and you can adjust that afterwards in Edit.
-- **Combine sounds** (in Edit mode, or "Combine with others" when editing a pad) splices pads one after another, with a gap or an overlap between them, or layers them so they play together. Drag a sound along the timeline to change when it starts, set each one's volume and fade in or out, preview, then save the result as a new pad. The pads you combined stay as they were. A combined pad remembers how it was made, so "Change the combination" reopens it for tweaking.
+- **Combine sounds** (in Edit mode, or "Combine with others" when editing a pad) splices pads one after another, with a gap or an overlap between them, or layers them so they play together. Drag a sound along the timeline to change when it starts, trim it by dragging its edges, set its volume and fade in or out, preview, then save the result as a new pad. The pads you combined stay as they were. A combined pad remembers how it was made, so "Change the combination" reopens it for tweaking.
 - Only add videos and audio you made yourself or are allowed to use. The repo is public, so everything on the board can be downloaded by anyone who finds it.
 
 ## How it works
